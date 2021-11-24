@@ -1,0 +1,39 @@
+<!-- searchBatch.html -->
+<div class="jumbotron text-center" ng-controller="searchBatchController as searchBatchCtrl">
+  <form name="searchBatches" ng-submit="searchBatchCtrl.searchBatches(batch)">
+    
+    <div class="row">
+      <div class="col-xs-1">
+	<label class="control-label"> </label>
+      </div>
+      <div class="col-xs-6">
+	<h4 class="text-left">Search for batches or compounds</h4>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-xs-1">
+	<label class="control-label"> </label>
+      </div>
+      <div class="col-xs-5">
+	<fieldset class="form-group">
+	  <input type="text" ng-model="searchBatchCtrl.sBatches" class="form-control" autofocus
+		 id="formGroupInput" placeholder="Batches or Compounds" title="description"></input>
+	</fieldset>
+      </div>
+
+      <fieldset class="form-group">
+	<div class="col-xs-2">	
+	  <input type="submit" class="btn btn-primary pull-right" value="Search" />
+	</div>
+      </fieldset>
+    </div>
+  </form>
+<br>
+  <div class="col-xs-1">
+    <label class="control-label"> </label>
+  </div>
+  <div class="col-xs-7">
+    <div ui-grid="searchBatchCtrl.gridOptions" ui-grid-cellNav ui-grid-exporter class="grid"></div>
+  </div>
+</div>

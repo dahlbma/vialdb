@@ -1,0 +1,63 @@
+<!-- addBox.html -->
+<div class="jumbotron text-center">
+
+  <form name="addBox" ng-controller="addBoxController as addBoxCtrl"
+	ng-submit="addBoxCtrl.addBox(box)" class="form-horizontal">
+
+    <div class="row">
+      <div class="col-xs-2">
+	<label class="control-label"> </label>
+      </div>
+      <div class="col-xs-3">
+	<h4 class="text-left">Add a new box</h4>
+      </div>
+    </div>
+
+    <div class="row">
+      <fieldset class="form-group">
+        <div class="col-xs-2">
+	  <label class="control-label">Location:</label>
+	</div>
+        <div class="col-xs-4">
+          <select ng-model="addBoxCtrl.sLocation" ng-init="addBoxCtrl.sLocation = addBoxCtrl.data.locations[0]"
+		  class="form-control" ng-options="location.location_id for location in addBoxCtrl.data.locations">
+          </select>
+        </div>
+        <div class="col-xs-2">
+	  <div class="pull-left">{{addBoxCtrl.sLocation.location_description}}</div>
+	</div>
+      </fieldset>
+
+      <fieldset class="form-group">
+        <div class="col-xs-2">
+	  <label class="control-label">Vial type:</label>
+	</div>
+
+        <div class="col-xs-4">
+          <select ng-model="addBoxCtrl.sBoxType" ng-init="addBoxCtrl.sBoxType = addBoxCtrl.data.locationTypes[0]"
+		  class="form-control" ng-options="type.vial_type_desc for type in addBoxCtrl.data.locationTypes">
+          </select>
+        </div>
+      </fieldset>
+
+
+      <div class="col-xs-2">
+	<label class="control-label">Description:</label>
+      </div>
+      <div class="col-xs-4">
+        <fieldset class="form-group">
+          <input type="text" ng-model="addBoxCtrl.sDescription" class="form-control" id="formGroupInputLarge" 
+  		 placeholder="Box description" title="description"></input>
+	</fieldset>
+	
+	<fieldset class="form-group">
+	  <input type="submit" class="btn btn-primary pull-right" value="Add Box" />
+	</fieldset>
+	<div ng-hide="mainCtrl.data.boxDescription == ''">
+	  Added new box: {{mainCtrl.data.boxId}} "{{mainCtrl.data.boxDescription}}"
+	</div>
+      </div>
+    </div>
+    
+  </form>
+</div>

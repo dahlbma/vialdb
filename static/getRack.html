@@ -1,0 +1,39 @@
+<!-- getRack.html -->
+<div class="jumbotron text-center" ng-controller="getRackController as getRackCtrl">
+  <form name="searchVials" ng-submit="getRackCtrl.getRack(vial)">
+    
+    <div class="row">
+      <div class="col-xs-1">
+	<label class="control-label"> </label>
+      </div>
+      <div class="col-xs-6">
+	<h4 class="text-left">Search for rack</h4>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-1">
+	<label class="control-label"> </label>
+      </div>
+      <div class="col-xs-5">
+	<fieldset class="form-group">
+	  <input type="text" ng-model="getRackCtrl.sRack" class="form-control"
+		 id="formGroupInput" placeholder="Rack id" title="description"  autofocus></input>
+	</fieldset>
+      </div>
+
+      <fieldset class="form-group">
+	<div class="col-xs-3">	
+	  <input type="submit" class="btn btn-primary pull-right" value="Search" />
+	  <div ng-show="getRackCtrl.showSpinner == 'spinner'" class="loader"></div>
+	</div>
+      </fieldset>
+    </div>
+  </form>
+<br>
+  <div class="col-xs-1">
+    <label class="control-label"> </label>
+  </div>
+  <div class="col-xs-7">
+    <div ui-grid="getRackCtrl.gridOptions" ui-grid-cellNav ui-grid-exporter class="grid"></div>
+  </div>
+</div>

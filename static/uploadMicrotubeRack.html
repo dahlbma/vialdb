@@ -1,0 +1,32 @@
+<!-- uploadMicrotubeRack.html -->
+<div class="jumbotron text-center" ng-controller="uploadMicrotubeRackController as uploadMicrotubeRackCtrl">
+
+  <div class="row">
+    <div class="col-xs-1"></div>
+    <div class="col-xs-4">
+        <input type="file" file-model="myFile" id="fileInput"/>
+    </div>
+    <div class="col-xs-2">
+      <button ng-click="uploadFile()">Upload</button>
+    </div>
+  </div>
+
+
+  <p><br>
+
+  <div class="row">
+    <div ng-hide="saFailedTubes == null">
+    <div class="col-xs-1"></div>
+      <div class="col-xs-3">
+        <label class="control-label">Updated {{saFailedTubes.iOk}} tubes in rack {{saFailedTubes.sRack}}</label>
+      </div>
+    </div>
+
+  <div class="row">
+    <div class="col-xs-2" ng-show="saFailedTubes.FailedTubes.length">
+      <b>Failed:</b> <div ng-repeat="sTube in saFailedTubes.FailedTubes">
+	{{sTube}}
+      </div>
+    </div>
+  </div>
+</div>

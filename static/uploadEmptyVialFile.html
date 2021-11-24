@@ -1,0 +1,36 @@
+<!-- uploadEmptyVialFile.html -->
+<div class="jumbotron text-center" ng-controller="uploadEmptyVialController as uploadEmptyVialCtrl">
+
+  <div class="row">
+    <div class="col-xs-1"></div>
+    <div class="col-xs-4">
+        <input type="file" file-model="myFile" id="fileInput"/>
+    </div>
+    <div class="col-xs-2">
+      <button ng-click="uploadFile()">Upload</button>
+    </div>
+  </div>
+
+
+  <p><br>
+
+  <div class="row">
+    <div ng-hide="saFailedVials == null">
+    <div class="col-xs-1"></div>
+      <div class="col-xs-2">
+        <label class="control-label">Added {{saFailedVials.iOk}} vials</label>
+      </div>
+      <div class="col-xs-2">
+        <label class="control-label">Updated tare {{saFailedVials.iError}} vials</label>
+      </div>
+    </div>
+
+  <div class="row">
+    <div class="col-xs-2" ng-show="saFailedVials.FailedVials.length">
+      <label class="control-label">Updated tare:</label>
+      <div ng-repeat="sVial in saFailedVials.FailedVials">
+	{{sVial}}
+      </div>
+    </div>
+  </div>
+</div>

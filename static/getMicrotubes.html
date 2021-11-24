@@ -1,0 +1,39 @@
+<!-- getMicrotubes.html -->
+<div class="jumbotron text-center" ng-controller="getMicrotubesController as getMicrotubesCtrl">
+  <form name="searchVials" ng-submit="getMicrotubesCtrl.getMicrotubes(vial)">
+    
+    <div class="row">
+      <div class="col-xs-1">
+	<label class="control-label"> </label>
+      </div>
+      <div class="col-xs-6">
+	<h4 class="text-left">Search for microtubes</h4>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-1">
+	<label class="control-label"> </label>
+      </div>
+      <div class="col-xs-5">
+	<fieldset class="form-group">
+	  <input type="text" ng-model="getMicrotubesCtrl.sBatches" class="form-control"
+		 id="formGroupInput" placeholder="Batches" title="description"  autofocus></input>
+	</fieldset>
+      </div>
+
+      <fieldset class="form-group">
+	<div class="col-xs-3">	
+	  <input type="submit" class="btn btn-primary pull-right" value="Search" />
+	  <div ng-show="getMicrotubesCtrl.showSpinner == 'spinner'" class="loader"></div>
+	</div>
+      </fieldset>
+    </div>
+  </form>
+<br>
+  <div class="col-xs-1">
+    <label class="control-label"> </label>
+  </div>
+  <div class="col-xs-7">
+    <div ui-grid="getMicrotubesCtrl.gridOptions" ui-grid-cellNav ui-grid-exporter class="grid"></div>
+  </div>
+</div>

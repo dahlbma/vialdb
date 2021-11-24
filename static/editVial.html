@@ -1,0 +1,124 @@
+<!-- editVial.html -->
+
+<div class="row">
+  <div class="col-xs-2">
+    <label class="control-label"> </label>
+  </div>
+  <div class="col-xs-3">
+    <h4 class="text-left">Associate vial to batch</h4>
+  </div>
+</div>
+
+<form name="editVial" ng-controller="editVialController as editVialCtrl" class="form-horizontal">
+
+  <div class="form-group">
+    <label class="control-label col-xs-2" for="vial_id">Vial:</label>
+    <div class="col-xs-2" ng-class="{ 'has-error' : editVial.vial.$invalid &&
+				    !editVial.vial.$pristine }">
+      <input type="text" ng-model="editVialCtrl.formData.sVial" id="vial_id" name="vial" 
+  	     placeholder="Vial id" ng-change="editVialCtrl.vialChange()" class="form-control"
+	     title="Ex: v200204"  autofocus
+	     ng-pattern="/^(v|V)[0-9][0-9][0-9][0-9][0-9]([0-9]|[0-9][0-9])$/" required></input>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-xs-2" for="batch_id">Batch:</label>
+    <div class="col-xs-2" ng-class="{ 'has-error' : editVial.batch.$invalid &&
+				    !editVial.batch.$pristine }">
+      <input type="text" ng-model="editVialCtrl.formData.batch_id" id="batch_id" 
+  	     placeholder="Batch id" title="batch" class="form-control" name="batch"
+	     ng-change="editVialCtrl.batchChange()"
+	     ng-pattern="/^\S\S\S\S\S\S\S/" required></input>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-xs-2" for="compound_id">Compound:</label>
+    <div class="col-xs-2">
+      <input type="text" ng-model="editVialCtrl.formData.compound_id" id="compound_id"
+  	     placeholder="Compound id" title="compound" ng-disabled="true"
+	     class="form-control"></input>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-xs-2" for="formula_weight">Formula weight:</label>
+    <div class="col-xs-2">
+      <input type="text" ng-model="editVialCtrl.formData.batch_formula_weight" id="formula_weight"
+  	     placeholder="Formula weight" title="formula_weight" ng-disabled="true"
+	     class="form-control"></input>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-xs-2" for="tare">Vial tare (g):</label>
+    <div class="col-xs-2">
+      <input type="text" ng-model="editVialCtrl.formData.tare" id="tare" class="form-control"
+  	     placeholder="Vial tare" title="tare" required></input>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-xs-2" for="vial_type">Vial type:</label>
+    <div class="col-xs-2">
+      <select ng-model="editVialCtrl.formData.sBoxType"
+	      ng-init="editVialCtrl.formData.sBoxType = editVialCtrl.data.locationTypes[0]
+		       ; editVialCtrl.updatedVialType()"
+	      class="form-control" id="vial_type"
+	      ng-change="editVialCtrl.updatedVialType()"
+	      ng-options="type.vial_type_desc for type in editVialCtrl.data.locationTypes">
+      </select>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-xs-2" for="gross_weight">Gross weight (g):</label>
+    <div class="col-xs-2" ng-class="{ 'has-error' : editVial.gross.$invalid &&
+				    !editVial.gross.$pristine }">
+      <input type="text" ng-model="editVialCtrl.formData.iGross" id="gross_weight" name="gross"
+  	     placeholder="Gross weight" ng-change="editVialCtrl.grossChange()" title="gross"
+	     ng-pattern="/^[0-9]+[\.]*[0-9]*$/" required class="form-control"></input>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="control-label col-xs-2" for="net_weight">Net weight (g):</label>
+    <div class="col-xs-2" ng-class="{ 'has-error' : editVial.netWeight.$invalid &&
+				    !editVial.netWeight.$pristine}">
+      <input type="text" name="netWeight" ng-model="editVialCtrl.formData.iNetWeight" id="net_weight"
+  	     placeholder="Net weight" title="Formula weight" class="form-control"
+             ng-pattern="/^[0-9]+.[0-9]+$/" required></input>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-xs-2" for="dilution_factor">Dilution factor (uL):</label>
+    <div class="col-xs-2">
+      <input type="text" ng-model="editVialCtrl.formData.iDilutionFactor" id="dilution_factor" class="form-control"
+  	     placeholder="Dilution factor" title="dilution factor"></input>
+    </div>
+  </div>
+
+  <div class="form-group">
+      <label class="control-label col-xs-2" for="submit_btn"> </label>
+      <div class="col-xs-2" ng-show="editVialCtrl.lNormal">
+	<div class="btn btn-primary" value="Update vial" id="submit_btn"
+               ng-disabled="editVial.netWeight.$invalid || editVialCtrl.formData.batch_formula_weight == null"
+	     ng-click="editVialCtrl.editVial()">
+	  Update vial</div>
+      </div>
+
+      <div ng-show="!editVialCtrl.lNormal">
+	<div class="col-xs-2">
+	  <div class="btn btn-success" value="Create vial" id="submit_btn"
+               ng-disabled="editVial.netWeight.$invalid" ng-click="editVialCtrl.printVial()">
+	    Print label</div>
+	</div>
+      </div>
+      <div class="col-xs-2">
+	<label class="label label-default text-left">{{editVialCtrl.sMessage}}</label>
+      </div>
+      
+  </div>
+  
+</form>

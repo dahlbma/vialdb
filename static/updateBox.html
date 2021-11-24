@@ -1,0 +1,59 @@
+<!-- updateBox.html -->
+<div ng-controller="searchBoxController as searchBoxCtrl">
+  <div class="jumbotron text-center">
+
+    <form name="searchBox" ng-submit="searchBoxCtrl.searchBox(box); searchBox.$setPristine()" novalidate>
+
+      <div class="row">
+	<div class="col-xs-1">
+	  <label class="control-label"> </label>
+	</div>
+	<div class="col-xs-4">
+	  <h4 class="text-left">Update box content</h4>
+	</div>
+      </div>
+
+      <div class="row">
+	<div class="col-xs-1">
+	  <label class="control-label"> </label>
+	</div>
+	<div class="col-xs-2">
+	  <fieldset class="form-group" ng-class="{ 'has-error' : searchBox.box.$invalid &&
+						 !searchBox.box.$pristine }">
+	    <input type="text" ng-model="searchBoxCtrl.sBox" id="vial_id" class="form-control"  autofocus
+  		   placeholder="Box id" ng-change="searchBoxCtrl.boxChange()" title="Ex: db00001"
+		   ng-pattern="/^(db|DB)[0-9][0-9][0-9][0-9][0-9]$/" required name="box"></input>
+	  </fieldset>
+	</div>
+
+	<div class="col-xs-2">
+	  <div ng-click="searchBoxCtrl.printClick()" class="btn btn-primary pull-left"
+		  ng-class="{'disabled': searchBoxCtrl.disableButtons}">Print label
+	  </div>
+	</div>
+
+	<div class="col-xs-4">
+	  <div ng-if="searchBoxCtrl.sMessage == ''">
+	    <label class="label label-default text-left">{{searchBoxCtrl.sBoxInfo}}</label>
+	  </div>
+	  <div ng-if="searchBoxCtrl.sMessage != ''">
+	    <label class="label label-danger text-left" ng-show="searchBoxCtrl.showMessage"
+		   class="message fadein fadeout">{{searchBoxCtrl.sMessage}}</label>
+	  </div>
+	</div>
+
+      </div>
+    </form>
+  </div>
+
+  <div class="col-xs-1">
+    <label class="control-label"> </label>
+  </div>
+  <div class="col-xs-7">
+    <div ui-grid="searchBoxCtrl.gridOptions" ng-keypress="searchBoxCtrl.keyPress($event)" ng-init="searchBoxCtrl.sVial=''" ui-grid-edit ui-grid-row-edit ui-grid-cellNav
+	 class="grid pull-left"></div>
+    <div class="text-left" ng-show="(mainCtrl.data.vials).length"></div>    
+  </div>
+{{searchBoxCtrl.sVial}}
+</div>
+

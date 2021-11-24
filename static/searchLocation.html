@@ -1,0 +1,54 @@
+<!-- searchLocation.html -->
+<div class="jumbotron text-center" ng-controller="searchLocationController as searchLocCtrl">
+  <form name="searchLocation" ng-submit="searchLocCtrl.searchLoc(location); searchLocCtrl.$setPristine()"
+	novalidate>
+    <div class="row">
+      <div class="col-xs-1">
+	<label class="control-label"> </label>
+      </div>
+      <div class="col-xs-4">
+	<h4 class="text-left">Search for boxes in a location (dp00001)</h4>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-xs-1">
+	<label class="control-label"> </label>
+      </div>
+      <div class="col-xs-2">
+	<fieldset class="form-group" ng-class="{ 'has-error' : searchLocation.location.$invalid &&
+					       !searchLocation.location.$pristine }">
+	  <input type="text" name="location" ng-model="searchLocCtrl.sLocation"  autofocus
+		 class="form-control" id="formGroupInputLarge" placeholder="Location"
+		 title="location" ng-pattern="/^(dp|DP)[0-9][0-9][0-9][0-9][0-9]$/" required>
+        </input>
+
+	</fieldset>
+      </div>
+      <fieldset class="form-group">
+	<div class="col-xs-2">
+	  <input type="submit" class="btn btn-primary pull-right" value="Search Location"
+		 ng-disabled="searchLocation.location.$invalid"/>
+	</div>
+      </fieldset>
+    </div>
+  </form>
+
+  <div class="text-left" ng-show="(mainCtrl.data.boxes).length">
+    <table class="table table-striped table-condensed">
+        <tr>
+          <th>Location Id</th>
+          <th>Location Description</th>
+          <th>Box Id</th>
+          <th>Box Description</th>
+        </tr>
+      <tr ng-repeat="x in mainCtrl.data.boxes">
+        <td>{{ x.locId }}</td>
+        <td>{{ x.locDescription }}</td>
+        <td><a href="/#/searchBox/{{ x.boxId }}">{{ x.boxId }}</a></td>
+        <td>{{ x.boxDescription }}</td>
+      </tr>
+    </table>
+  </div>
+
+</div>

@@ -1,0 +1,59 @@
+<!-- addBox.html -->
+<div class="jumbotron text-center">
+
+  <form name="addBox" ng-controller="createEmptyVialsNLabelsController as createEmptyVialsNLabelsCtrl"
+	ng-submit="createEmptyVialsNLabelsCtrl.addBox(box)" class="form-horizontal">
+
+    <div class="row">
+      <div class="col-xs-2">
+	<label class="control-label"> </label>
+      </div>
+      <div class="col-xs-3">
+	<h4 class="text-left">Create empty vials</h4>
+      </div>
+    </div>
+
+    <div class="row">
+      <fieldset class="form-group">
+        <div class="col-xs-2">
+	  <label class="control-label pull-right">Number of vials:</label>
+	</div>
+        <div class="col-xs-2">
+
+          <input type="text" ng-model="createEmptyVialsNLabelsCtrl.numberOfVials"
+		 class="form-control"  autofocus
+  		 placeholder="Number of vials" title="Number of vials"
+		 ng-change="createEmptyVialsNLabelsCtrl.onlyDigits()"/>
+        </div>
+        <div class="col-xs-2">
+	  <div class="pull-left">{{createEmptyVialsNLabelsCtrl.sLocation.location_description}}</div>
+	</div>
+      </fieldset>
+
+      <fieldset class="form-group">
+        <div class="col-xs-2">
+	  <label class="control-label pull-right">Vial type:</label>
+	</div>
+
+        <div class="col-xs-2">
+          <select ng-model="createEmptyVialsNLabelsCtrl.sBoxType"
+		  ng-init="createEmptyVialsNLabelsCtrl.sBoxType = createEmptyVialsNLabelsCtrl.data.locationTypes[0]"
+		  class="form-control pull-left"
+		  ng-options="type.vial_type_desc for type in createEmptyVialsNLabelsCtrl.data.locationTypes">
+          </select>
+        </div>
+      </fieldset>
+
+      <div class="col-xs-2"> </div>
+      <div class="col-xs-2">
+	<fieldset class="form-group">
+	  <div class="btn btn-primary pull-left"
+	       ng-click="createEmptyVialsNLabelsCtrl.execCreateVials()"
+	       ng-disabled="createEmptyVialsNLabelsCtrl.invalidDigit">
+	    Create vials</div>
+	</fieldset>
+      </div>
+    </div>
+    
+  </form>
+</div>

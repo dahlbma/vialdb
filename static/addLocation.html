@@ -1,0 +1,42 @@
+<!-- addLocation.html -->
+<div class="jumbotron text-center">
+
+  <form name="addLocation" ng-controller="addLocationController as addLocCtrl"
+	ng-submit="addLocCtrl.addLoc(location)">
+
+    <!-- <p>{{ mainCtrl.data }}</p> -->
+    
+    <div class="row">
+      <div class="col-xs-1">
+	<label class="control-label"> </label>
+      </div>
+      <div class="col-xs-4">
+	<h4 class="text-left">Add a new location for compound boxes</h4>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-xs-1">
+	<label class="control-label"> </label>
+      </div>
+      <div class="col-xs-4">
+
+	<fieldset class="form-group">
+	  <input type="text" ng-model="addLocCtrl.sDescription" class="form-control" id="formGroupInputLarge" 
+  		 placeholder="Location description" title="description"  autofocus></input>
+	</fieldset>
+
+
+	<fieldset class="form-group">
+	  <input type="submit" class="btn btn-primary pull-right" value="Add Location" />
+	</fieldset>
+
+      </div>
+    </div>
+
+    <div ng-hide="mainCtrl.data.locDescription == ''">
+      Added new location: {{mainCtrl.data.locId}} "{{mainCtrl.data.locDescription}}"
+    </div>
+
+  </form>
+</div>
