@@ -95,36 +95,17 @@ indexHtml="""
            &nbsp;
            <div class="btn-group navbar-btn">
               {%if user_name != None%}
-                {{user_name}}<br>
+                {{user_name}}
+                <br>
                 <a href="/logout">Logout</a>
               {% else %}
-                
-                <!-- <a href="/login">Login</a> -->
-                <button onclick="document.getElementById('loginform').style.display='block'" style="width:auto;">Login form</button>
+                <br>
+                <a href="/login">Login</a>
               {% end %}
            </div>
       </ul>
     </div>
   </nav>
-
-  <div id="loginform" class="modal">
-    
-    <form class="modal-content animate" action="/login" method="post">
-      <div class="container">
-        <label for="username"><b>Username</b></label>
-        <input type="text" placeholder="Enter Username" name="username" required>
-            
-        <label for="password"><b>Password</b></label>
-        <input type="password" placeholder="Enter Password" name="password" required>
-
-          <button type="submit">Login</button>
-      </div>
-
-      <div class="container" style="background-color:#f1f1f1">
-        <button type="button" onclick="document.getElementById('loginform').style.display='none'" class="cancelbtn">Cancel</button>
-      </div>
-    </form> 
-  </div>
 
   <div id="main">
     <!-- angular templating -->
@@ -149,35 +130,13 @@ notAuthorizedHtml="""
         <a class="navbar-brand" href="/">DDDP Vials</a>
       </div>
       <ul class="nav navbar-nav navbar-right">
-           <!-- <div class="btn-group navbar-btn">-->
-                
-                <!-- <a href="/login">Login</a> -->
-                <button onclick="document.getElementById('loginform').style.display='block'" style="width:auto;">Login form</button>
-           <!-- </div> -->
+           <div class="btn-group navbar-btn">
+                <br>
+                <a href="/login">Login</a>
+           </div>
       </ul>
     </div>
   </nav>
-
-  <div id="loginform" class="modal">
-    
-    <form class="modal-content animate" action="/login" method="post">
-      <div class="container">
-        <label for="username"><b>Username</b></label>
-        <input type="text" placeholder="Enter Username" name="username" required>
-            
-        <label for="password"><b>Password</b></label>
-        <input type="password" placeholder="Enter Password" name="password" required>
-
-          <button type="submit">Login</button>
-      </div>
-
-      <div class="container" style="background-color:#f1f1f1">
-        <button type="button" onclick="document.getElementById('loginform').style.display='none'" class="cancelbtn">Cancel</button>
-      </div>
-    </form> 
-  </div>
-
-  
 </body>
 </html>
 """

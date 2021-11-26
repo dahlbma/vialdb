@@ -52,17 +52,18 @@ class BaseHandler(tornado.web.RequestHandler):
         raise tornado.web.HTTPError(404, reason='Page not found')
 
     def get_current_user(self):
-        return self.get_secure_cookie("user")
+        return self.get_secure_cookie("token")
 
     def get_current_user_name(self):
         # Fix ridiculous bug with quotation marks showing on the web
-        user = self.get_current_user()
-        if user:
-            if (user[0] == '"') and (user[-1] == '"'):
-                return user[1:-1]
-            else:
-                return user
-        return user
+        #user = self.get_current_user()
+        #if user:
+        #    if (user[0] == '"') and (user[-1] == '"'):
+        #        return user[1:-1]
+        #    else:
+        #        return user
+        
+        return self.get_cookie("username")#user
 
     def write_error(self, status_code, **kwargs):
         """ Overwrites write_error method to have custom error pages.
@@ -119,31 +120,20 @@ class UnsafeHandler(BaseHandler):
 class LoginHandler(tornado.web.RequestHandler):
     @tornado.gen.coroutine
     
-    def post(self, *args):
-        username = self.get_argument('username')
-        password = self.get_argument('password')
-        try:
-            db_connection2 = MySQLdb.connect(
-                host="esox3",
-                user=username,
-                passwd=password
-            )
-            db_connection2.close()
-        except Exception as ex:
-            logging.getLogger().error(str(ex))
-            self.set_status(400)
-            self.write({'message': 'Wrong username password'})
-            self.finish()
-            return
-        payload = {
-            'username': username,
-            'exp': datetime.utcnow() + timedelta(seconds=JWT_EXP_DELTA_SECONDS)
-        }
-        jwt_token = jwt.encode(payload, JWT_SECRET, JWT_ALGORITHM)
-        self.write({'token': jwt_token})
-
     def get(self):
-        pass
+        self.write(
+            '<form class="modal-content animate" action="/login" method="post">'
+                '<div class="container">'
+                    '<label for="username"><b>Username</b></label>'
+                    '<input type="text" placeholder="Enter Username" name="username" required>'
+            
+                    '<label for="password"><b>Password</b></label>'
+                    '<input type="password" placeholder="Enter Password" name="password" required>'
+
+                    '<button type="submit">Login</button>'
+                '</div>'
+            '</form>')
+        return
         if self.get_argument("code", False):
             user_token =  yield self.get_authenticated_user(
                 redirect_uri=self.application.settings['redirect_uri'],
@@ -176,10 +166,51 @@ class LoginHandler(tornado.web.RequestHandler):
                         response_type='code',
                         extra_params={'approval_prompt': 'auto'})
 
+    def post(self, *args):
+        username = self.get_argument('username')
+        password = self.get_argument('password')
+        try:
+            db_connection2 = MySQLdb.connect(
+                host="esox3",
+                user=username,
+                passwd=password
+            )
+            db_connection2.close()
+        except Exception as ex:
+            logging.getLogger().error(str(ex))
+            #self.set_status(400)
+            #self.write({'message': 'Wrong username password'})
+            #self.finish()
+            url = "/unauthorized?email={0}&contact={1}".format(username,
+                        self.application.settings['contact_person'])
+            self.redirect(url)
+        payload = {
+            'username': username,
+            'exp': datetime.utcnow() + timedelta(seconds=JWT_EXP_DELTA_SECONDS)
+        }
+        jwt_token = jwt.encode(payload, JWT_SECRET, JWT_ALGORITHM)
+        print(username)
+        self.set_cookie('username', username)
+        self.set_secure_cookie('token', jwt_token)
+    
+        #self.set_secure_cookie('login_redirect', self.get_argument("next", '/'), 1)
+        self.redirect("/")
+        #self.authorize_redirect(
+        #            redirect_uri=self.application.settings['redirect_uri'],
+        #            client_id=self.application.oauth_key,
+        #            scope=['profile', 'email'],
+        #            response_type='code',
+        #            extra_params={'approval_prompt': 'auto'})
+
+    
+
 class LogoutHandler(tornado.web.RequestHandler, tornado.auth.GoogleOAuth2Mixin):
     def get(self):
         self.clear_cookie("user")
         self.clear_cookie("email")
+        
+        self.clear_cookie("token")
+        self.clear_cookie("username")
         self.redirect("/")
 
 class UnAuthorizedHandler(UnsafeHandler):
@@ -199,11 +230,11 @@ class MainHandler(UnsafeHandler):
     def get(self):
         self.set_header('Access-Control-Allow-Origin', '*')
         t = template.Template(applicationTemplate.indexHtml)
-        self.write(t.generate())
+        #self.write(t.generate())
 
-        self.write("MainHandler")
+        #self.write("MainHandler")
         #t = self.application.loader.load("index.html")
-        #self.write(t.generate(user=self.get_current_user_name()))
+        self.write(t.generate(user_name=self.get_current_user_name()))
 
 
 class SafeStaticFileHandler(tornado.web.StaticFileHandler, SafeHandler):

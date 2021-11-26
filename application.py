@@ -37,8 +37,8 @@ class home(util.UnsafeHandler):
         t = template.Template(applicationTemplate.indexHead)
         self.write(t.generate())
         t = template.Template(applicationTemplate.indexHtml)
-        logging.info(self.get_current_user())
-        self.write(t.generate(user_name=self.get_current_user()))
+        logging.info(self.get_current_user_name())
+        self.write(t.generate(user_name=self.get_current_user_name()))
 
 class getMicroTubeByBatch(util.SafeHandler):
     def get(self, sBatches):
