@@ -143,6 +143,7 @@ class LoginHandler(tornado.web.RequestHandler):
         self.write({'token': jwt_token})
 
     def get(self):
+        pass
         if self.get_argument("code", False):
             user_token =  yield self.get_authenticated_user(
                 redirect_uri=self.application.settings['redirect_uri'],
