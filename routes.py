@@ -9,23 +9,34 @@ from tornado import template
 from tornado.options import define, options
 import logging
 
+# Secret stuff in config file
+import config
+
 tornado.log.enable_pretty_logging()
 logging.getLogger().setLevel(logging.DEBUG)
 
 redirect_uri = "https://esox2.scilifelab.se:8082/login"
 
+settings = {
+    "cookie_secret": config.secret_key,
+}
+
+JWT_SECRET = config.secret_key
+JWT_ALGORITHM = 'HS256'
+JWT_EXP_DELTA_SECONDS = 99999
+
 # Setup the Tornado Application
-cookie_secret = 'dlfijUNkjhk65567nhljhkjhNK67nmnHJGFJLIu'
-settings = {"debug": True,
-            "cookie_secret": cookie_secret,
-            "login_url": "/login",
-            "google_oauth": {
-        "key": "982621041927-n94tfetcl4gpc7h3jcrop8kue2v0fc3o.apps.googleusercontent.com",
-        "secret": "qQQnRgvAunFzOx0mRxqtDAYF"
-        },
-            "contact_person": 'mats.dahlberg@scilifelab.se',
-            "redirect_uri": redirect_uri
-            }
+#cookie_secret = 'dlfijUNkjhk65567nhljhkjhNK67nmnHJGFJLIu'
+#settings = {"debug": True,
+#            "cookie_secret": cookie_secret,
+#            "login_url": "/login",
+#            "google_oauth": {
+#        "key": "982621041927-n94tfetcl4gpc7h3jcrop8kue2v0fc3o.apps.googleusercontent.com",
+#        "secret": "qQQnRgvAunFzOx0mRxqtDAYF"
+#        },
+#            "contact_person": 'mats.dahlberg@scilifelab.se',
+#            "redirect_uri": redirect_uri
+#            }
 
 class Application(tornado.web.Application):
     def __init__(self, settings):

@@ -10,6 +10,11 @@ import applicationTemplate
 from datetime import datetime
 import applicationTemplate
 
+from datetime import datetime, timedelta
+import logging
+import jwt
+from auth import jwtauth
+
 # secret stuff
 import config
 
@@ -19,6 +24,11 @@ db = MySQLdb.connect(
     passwd=config.database['password'],
     database='chem_reg'
 )
+
+JWT_SECRET = config.secret_key
+JWT_ALGORITHM = 'HS256'
+JWT_EXP_DELTA_SECONDS = 99999
+
 
 def isAuthorized(email):
     tRes = db.query("""select user_name, full_name, organization
@@ -120,7 +130,7 @@ class LoginHandler(tornado.web.RequestHandler):
             )
             db_connection2.close()
         except Exception as ex:
-            logger.error(str(ex))
+            logging.getLogger().error(str(ex))
             self.set_status(400)
             self.write({'message': 'Wrong username password'})
             self.finish()

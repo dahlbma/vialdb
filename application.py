@@ -137,7 +137,7 @@ class readScannedRack(util.SafeHandler):
                       where tube_id = '%s'
                    """ % (sPosition, sRackId, sTube)
             cur.execute(sSql)
-            con.commit()
+            #con.commit()
             iOk += 1
         self.finish(json.dumps({'FailedTubes': saError,
                                 'iOk': iOk,

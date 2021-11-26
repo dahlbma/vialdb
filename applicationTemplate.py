@@ -132,10 +132,52 @@ notAuthorizedHtml="""
            <div class="btn-group navbar-btn">
                 <br>
                 <a href="/login">Login</a>
+                <button onclick="document.getElementById('id01').style.display='block'" style="width:auto;">Login</button>
            </div>
       </ul>
     </div>
   </nav>
+
+  <div id="id01" class="modal">
+    
+    <form class="modal-content animate" action="/login" method="post">
+    <div class="container">
+      <label for="username"><b>Username</b></label>
+      <input type="text" placeholder="Enter Username" name="username" required>
+          
+      <label for="password"><b>Password</b></label>
+      <input type="password" placeholder="Enter Password" name="password" required>
+
+        <button type="submit">Login</button>
+    </div>
+
+    <div class="container" style="background-color:#f1f1f1">
+      <button type="button" class="cancelbtn">Cancel</button>
+    </div>
+  </form> 
+
+    <form action="/action_page.php" method="post">
+      
+      <div class="container">
+        <label for="uname"><b>Username</b></label>
+        <input type="text" placeholder="Enter Username" name="uname" required>
+
+        <label for="psw"><b>Password</b></label>
+        <input type="password" placeholder="Enter Password" name="psw" required>
+          
+        <button type="submit">Login</button>
+        <label>
+          <input type="checkbox" checked="checked" name="remember"> Remember me
+        </label>
+      </div>
+
+      <div class="container" style="background-color:#f1f1f1">
+        <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  
 </body>
 </html>
 """
