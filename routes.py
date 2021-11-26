@@ -17,10 +17,10 @@ logging.getLogger().setLevel(logging.DEBUG)
 
 redirect_uri = "https://esox2.scilifelab.se:8082/login"
 
-settings = {
-    "cookie_secret": config.secret_key,
-}
-
+#settings = {
+#    "cookie_secret": config.secret_key,
+#}
+cookie_secret = config.secret_key
 JWT_SECRET = config.secret_key
 JWT_ALGORITHM = 'HS256'
 JWT_EXP_DELTA_SECONDS = 99999
