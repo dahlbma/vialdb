@@ -19,15 +19,15 @@ import config
 #con = cx_Oracle.connect('reader', 'reader', dsn_tns)
 #cur = con.cursor()
 
-db = MySQLdb.connect(
+db_connection = MySQLdb.connect(
     host=config.database['host'],
     user=config.database['user'],
     passwd=config.database['password'],
     database='chem_reg'
 )
 
-#db_connection.autocommit(True)
-cur = db.cursor()
+db_connection.autocommit(True)
+cur = db_connection.cursor()
 
 NR_OF_VIALS_IN_BOX = 200
 
@@ -136,7 +136,7 @@ class readScannedRack(util.SafeHandler):
             sSql = """update microtube.matrix_tube set position = '%s', matrix_id = '%s'
                       where tube_id = '%s'
                    """ % (sPosition, sRackId, sTube)
-            cur.execute(sSql)
+            sSlask = cur.execute(sSql)
             #con.commit()
             iOk += 1
         self.finish(json.dumps({'FailedTubes': saError,
@@ -162,7 +162,8 @@ class getRack(util.SafeHandler):
                     select compound_id from bcpvs.batch where
                     batch_id = '%s' or batch_id = '%s'
                     """ % ('UU_' + row[0], 'KI_' + row[0])
-                    tSsl = db.query(sSql)
+                    sSlask = cur.execute(sSql)
+                    tSsl = cur.fetchall()
                     if len(tSsl) == 0:
                         sSll = ''
                     else:
@@ -242,27 +243,27 @@ class uploadEmptyVials(util.SafeHandler):
                 if m:
                     sTare = ''.join(saLine[1].split())
                     try:
-                        sSql = """insert into vialdb.vial (vial_id, tare, update_date)
-                                  values (%s, %s, now())
-                               """
-                        db.insert(sSql, sVial, sTare)
+                        sSql = f"""insert into vialdb.vial (vial_id, tare, update_date) 
+                                   values ({sVial}, {sTare}, now())"""
+                        sSlask = cur.execute(sSql)
                         iOk += 1
                     except:
                         iError += 1
                         saError.append(sVial)
-                        sSql = """update vialdb.vial set
-                        tare = %s,
+                        sSql = f"""update vialdb.vial set
+                        tare = {sTare},
                         update_date = now()
-                        where vial_id = %s
+                        where vial_id = {sVial}
                         """
                         logging.info("Upload vial: " + sVial + ' Tare: ' + sTare)
-                        db.update(sSql, sTare, sVial)
+                        sSlask = cur.execute(sSql)
 
         self.finish(json.dumps({'FailedVials':saError, 'iOk':iOk, 'iError':iError}))
 
 def getNewLocationId():
-    tRes = db.query("""SELECT pk, location_id, location_description from vialdb.box_location
+    sSlask = cur.execute("""SELECT pk, location_id, location_description from vialdb.box_location
                        order by pk desc limit 1""")
+    tRes = cur.fetchall()
     if len(tRes) == 0:
         iKey = 0
     else:
@@ -272,7 +273,8 @@ def getNewLocationId():
     return sLoc
 
 def getNewBoxId():
-    tRes = db.query("""SELECT pk from vialdb.box order by pk desc limit 1""")
+    sSlask = cur.execute("""SELECT pk from vialdb.box order by pk desc limit 1""")
+    tRes = cur.fetchall()
     if len(tRes) == 0:
         iKey = 0
     else:
@@ -282,39 +284,41 @@ def getNewBoxId():
     return sLoc
 
 def deleteOldVialPosition(sVialId):
-    sSql = """update vialdb.box_positions set
-    vial_id=%s,
+    sSql = f"""update vialdb.box_positions set
+    vial_id={None},
     update_date=now()
-    where vial_id=%s
+    where vial_id={sVialId}
     """
-    db.update(sSql, None, sVialId)
+    sSlask = cur.execute(sSql)
 
 def logVialChange(sVialId, sOldPos, sNewPos):
-    sSql = """
+    sSql = f"""
     insert into vialdb.vial_log (vial_id, old_location, new_location)
-    values (%s, %s, %s)
+    values ({sVialId}, {sOldPos}, {sNewPos})
     """
-    db.insert(sSql, sVialId, sOldPos, sNewPos)
+    sSlask = cur.execute(sSql)
 
 def getVialPosition(sVialId):
-    sSql = """select IFNULL(b.box_id, '') box_id, IFNULL(b.coordinate, '') coordinate, v.checkedout
+    sSql = f"""select IFNULL(b.box_id, '') box_id, IFNULL(b.coordinate, '') coordinate, v.checkedout
     from vialdb.vial v
     left outer join vialdb.box_positions b on v.vial_id = b.vial_id
-    where v.vial_id=%s
+    where v.vial_id={sVialId}
     """
-    tRes = db.query(sSql, sVialId)
+    sSlask = cur.execute(sSql)
+    tRes = cur.fetchall()
     logging.info(tRes)
     if len(tRes) == 0:
         return '', '', ''
     return str(tRes[0].box_id).upper(), str(tRes[0].coordinate), tRes[0].checkedout
 
 def getBoxFromDb(sBox):
-    tRes = db.query("""SELECT v.vial_id, coordinate, batch_id, compound_id,
+    sSlask = cur.execute("""SELECT v.vial_id, coordinate, batch_id, compound_id,
                        b.box_id, box_description
                        from vialdb.box b
                        left join vialdb.box_positions v on b.box_id = v.box_id
                        left join vialdb.vial c on v.vial_id = c.vial_id
                        where b.box_id = '%s' order by coordinate asc""" % (sBox))
+    tRes = cur.fetchall()
     jRes = []
     for row in tRes:
         jRes.append({"vialId":row.vial_id,
@@ -360,27 +364,29 @@ class createLocation(util.SafeHandler):
             logging.error("Error cant find file1 in the argument list")
             return
         sLoc = getNewLocationId()
-        sSql = """insert into vialdb.box_location (location_id, location_description, update_date)
-                  values (%s, %s, now())"""
-        db.insert(sSql, sLoc, sDescription)
+        sSql = f"""insert into vialdb.box_location (location_id, location_description, update_date)
+                  values ({sLoc}, {sDescription}, now())"""
+        sSlask = cur.execute(sSql)
         self.write(json.dumps({'locId':sLoc,
                                'locDescription':sDescription}))
 
 class getLocations(util.SafeHandler):
     def get(self, *args, **kwargs):
         self.set_header("Content-Type", "application/json")
-        tRes = db.query("""SELECT location_id, location_description from vialdb.box_location
+        sSlask = cur.execute("""SELECT location_id, location_description from vialdb.box_location
                            order by pk""")
+        tRes = cur.fetchall()
         self.write(json.dumps(tRes, indent=4))
 
 class searchLocation(util.SafeHandler):
     def get(self, sLocation):
         self.set_header("Content-Type", "application/json")
-        tRes = db.query("""SELECT l.location_id, location_description, box_id, box_description
+        sSlask = cur.execute("""SELECT l.location_id, location_description, box_id, box_description
                            from vialdb.box_location l
                  	   left join vialdb.box b
                            on l.location_id = b.location_id
                            where l.location_id = '%s'""" % (sLocation))
+        tRes = cur.fetchall()
         jRes = []
         for row in tRes:
             jRes.append({"locId":row.location_id,
@@ -392,7 +398,8 @@ class searchLocation(util.SafeHandler):
 class verifyVial(util.SafeHandler):
     def get(self, sVial):
         sSql = """SELECT batch_id, vial_type from vialdb.vial where vial_id='%s'""" % sVial
-        tRes = db.query(sSql)
+        tRes = cur.execute(sSql)
+        tRes = cur.fetchall()
         lError = False
         if len(tRes) != 1:
             lError = True
@@ -411,21 +418,23 @@ class verifyVial(util.SafeHandler):
             logging.error(tRes)
             return
 
-        tRes = db.query("""SELECT v.vial_id sVial, v.batch_id, v.vial_type,
+        sSlask = cur.execute("""SELECT v.vial_id sVial, v.batch_id, v.vial_type,
         b.compound_id, v.tare, batch_formula_weight, net iNetWeight, gross iGross, dilution iDilutionFactor
         from vialdb.vial v
         left outer join bcpvs.batch b on v.batch_id = b.batch_id
         where  v.vial_id = '%s'
         """ % (sVial))
+        tRes = cur.fetchall()
         self.write(json.dumps(tRes))
 
 class batchInfo(util.SafeHandler):
     def get(self, sBatch):
-        tRes = db.query("""SELECT b.batch_id,
+        sSlask = cur.execute("""SELECT b.batch_id,
                            b.compound_id, batch_formula_weight
                            from bcpvs.batch b
                            where b.batch_id = '%s'
                            """ % (sBatch))
+        tRes = cur.fetchall()
         if len(tRes) != 1:
             lError = True
             sError = 'Batch not found ' + str(sBatch)
@@ -459,10 +468,10 @@ class editVial(util.SafeHandler):
         gross = %s,
         dilution = %s
         where vial_id = %s
-        """
+        """ % (sBatch, sCompoundId, sBoxType, sTare, sNetWeight, sGross, iDilutionFactor, sVial)
 
         try:
-            db.update(sSql, sBatch, sCompoundId, sBoxType, sTare, sNetWeight, sGross, iDilutionFactor, sVial)
+            cur.execute(sSql)
         except Exception as e:
             logging.error("Error updating vial " + str(sVial))
             logging.error("Error: " + str(e))
@@ -476,8 +485,9 @@ class printVial(util.SafeHandler):
                select batch_id, compound_id, vial_type_desc
                from vialdb.vial_type vt, vialdb.vial v
                where v.vial_id=%s and v.vial_type = vt.vial_type
-        """
-        tRes = db.query(sSql, sVial)
+        """ % (sVial)
+        sSlask = cur.execute(sSql)
+        tRes = cur.fetchall()
         if len(tRes) > 0:
             sDate = (time.strftime("%Y-%m-%d"))
             doPrint(tRes[0].compound_id, tRes[0].batch_id, tRes[0].vial_type_desc, sDate, sVial)
@@ -487,8 +497,9 @@ class printVial(util.SafeHandler):
 def getNextVialId():
     sTmp = "V%"
     sSql = """select vial_id from vialdb.vial where vial_id like %s
-              order by LENGTH(vial_id) DESC, vial_id desc limit 1"""
-    sVial =  db.query(sSql, sTmp)
+              order by LENGTH(vial_id) DESC, vial_id desc limit 1""" % (sTmp)
+    sSlask =  cur.execute(sSql)
+    sVial = cur.fetchall()
     try:
         sVial = sVial[0]['vial_id']
     except:
@@ -507,7 +518,8 @@ class createManyVialsNLabels(util.SafeHandler):
         iNumberOfVials = int(self.get_argument("numberOfVials", default='', strip=False))
         sType = self.get_argument("vialType", default='', strip=False)
         sSql = """SELECT vial_type_desc FROM vialdb.vial_type where vial_type = %s""" % (sType)
-        sTypeDesc = db.query(sSql)[0]['vial_type_desc']
+        sSlask = cur.execute(sSql)[0]['vial_type_desc']
+        sTypeDesc = cur.fetchall()
         for i in range(iNumberOfVials):
             sDate = (time.strftime("%Y-%m-%d"))
             sCmp = ""
@@ -522,7 +534,7 @@ class createManyVialsNLabels(util.SafeHandler):
             values ('%s', '%s', now(), '%s')
             """ % (sVial, sType, 'Unused')
             try:
-                db.insert(sSql)
+                sSlask = cur.execute(sSql)
                 logVialChange(sVial, '', 'Created')
             except:
                 sError = 'Vial already in database'
@@ -536,18 +548,19 @@ class generateVialId(util.SafeHandler):
 class discardVial(util.SafeHandler):
     def get(self, sVial):
         sSql = """update vialdb.box_positions set vial_id=%s, update_date=now()
-                  where vial_id=%s"""
-        db.update(sSql, None, sVial)
+                  where vial_id=%s""" % (None, sVial)
+        sSlask = cur.execute(sSql)
         sSql = """update vialdb.vial set discarded='Discarded', update_date=now(), checkedout=%s
-                  where vial_id=%s"""
-        db.update(sSql, None, sVial)
+                  where vial_id=%s""" % (None, sVial)
+        sSlask = cur.execute(sSql)
         logVialChange(sVial, '', 'Discarded')
         self.finish()
 
 class vialInfo(util.SafeHandler):
     def get(self, sVial):
         sSql = """SELECT batch_id from vialdb.vial where vial_id='%s'""" % sVial
-        tRes = db.query(sSql)
+        sSlask = cur.execute(sSql)
+        tRes = cur.fetchall()
         lError = False
         if len(tRes) != 1:
             sError = 'Vial not found'
@@ -562,29 +575,33 @@ class vialInfo(util.SafeHandler):
                   left join vialdb.box_positions p on v.vial_id = p.vial_id
                   left join vialdb.box b on p.box_id = b.box_id
                   where v.vial_id='%s'""" % sVial
-        tRes = db.query(sSql)
+        sSlask = cur.execute(sSql)
+        tRes = cur.fetchall()
         self.write(json.dumps(tRes))
 
 class getVialTypes(util.SafeHandler):
     def get(self, *args, **kwargs):
-        tRes = db.query("""SELECT vial_type, vial_type_desc, concentration from vialdb.vial_type
+        sSlask = cur.execute("""SELECT vial_type, vial_type_desc, concentration from vialdb.vial_type
                            order by vial_order asc""")
+        tRes = cur.fetchall()
         self.write(json.dumps(tRes))
 
 class getBoxDescription(util.SafeHandler):
     def get(self, sBox):
-        tRes = db.query("""SELECT box_description FROM vialdb.box where box_id = '%s'""" % (sBox))
+        sSlask = cur.execute("""SELECT box_description FROM vialdb.box where box_id = '%s'""" % (sBox))
+        tRes = cur.fetchall()
         self.write(json.dumps(tRes))
 
 
 def updateVialType(sBoxId, sVialId):
-    sSql = """ SELECT vial_type FROM vialdb.box where box_id = %s """
-    tType = db.query(sSql, sBoxId)
+    sSql = """ SELECT vial_type FROM vialdb.box where box_id = %s """ % (sBoxId)
+    sSlask = cur.execute(sSql)
+    tType = cur.fetchall()
     sSql = """update vialdb.vial set
               vial_type = %s
               where vial_id = %s
-           """
-    tRes = db.update(sSql, tType[0].vial_type, sVialId)
+           """ % (tType[0].vial_type, sVialId)
+    sSlask = cur.execute(sSql)
 
     
 class updateVialPosition(util.SafeHandler):
@@ -606,8 +623,9 @@ class updateVialPosition(util.SafeHandler):
         # Check if the position already is occupied by another compound
         sSql = """select vial_id from vialdb.box_positions
                   where box_id=%s and coordinate=%s
-               """
-        tRes = db.query(sSql, sBoxId, iCoordinate)
+               """ % (sBoxId, iCoordinate)
+        sSlask = cur.execute(sSql)
+        tRes = cur.fetchall()
         if len(tRes) != 1 or tRes[0].vial_id != None:
             self.set_status(400)
             jRes = getBoxFromDb(sBoxId)
@@ -621,8 +639,9 @@ class updateVialPosition(util.SafeHandler):
         sSql = """select v.vial_type
                   from vialdb.box b, vialdb.vial v
                   where (b.vial_type = v.vial_type or v.vial_type is null) and vial_id = %s and box_id = %s
-               """
-        tRes = db.query(sSql, sVialId, sBoxId)
+               """ % (sVialId, sBoxId)
+        sSlask = cur.execute(sSql)
+        tRes = cur.fetchall()
 
         if len(tRes) != 1:
             self.set_status(400)
@@ -653,31 +672,27 @@ class updateVialPosition(util.SafeHandler):
                   vial_id=%s,
                   update_date=now()
                   where box_id=%s and coordinate=%s
-               """
-        db.update(sSql,
-                  sVialId,
-                  sBoxId,
-                  iCoordinate)
+               """ % (sVialId, sBoxId, iCoordinate)
+        sSlask = cur.execute(sSql)
 
         # Make sure that the vial isn't checkedout anymore
         sSql = """update vialdb.vial set
                   checkedout=%s,
                   update_date=now()
                   where vial_id=%s
-               """
-        db.update(sSql,
-                  None,
-                  sVialId)
+               """ % (None, sVialId)
+        sSlask = cur.execute(sSql)
 
         jRes = getBoxFromDb(sBoxId)
         #self.finish(json.dumps(jRes))
 
-        tRes = db.query("""SELECT v.vial_id, coordinate, batch_id, compound_id,
+        sSlask = cur.execute("""SELECT v.vial_id, coordinate, batch_id, compound_id,
                        b.box_id, box_description
                        from vialdb.box b
                        left join vialdb.box_positions v on b.box_id = v.box_id
                        left join vialdb.vial c on v.vial_id = c.vial_id
                        where b.box_id = '%s' and coordinate = '%s'""" % (sBoxId, iCoordinate))
+        tRes = cur.fetchall()
         jRes = {"vialId":tRes[0].vial_id,
                 "coordinate":tRes[0].coordinate,
                 "batchId":tRes[0].batch_id,
@@ -689,9 +704,9 @@ class updateVialPosition(util.SafeHandler):
 
 class printBox(util.SafeHandler):
     def get(self, sBox):
-        tRes = db.query("""select box_description, vial_type_desc from vialdb.box b, vialdb.vial_type v
+        sSlask = cur.execute("""select box_description, vial_type_desc from vialdb.box b, vialdb.vial_type v
                   where b.vial_type=v.vial_type and box_id = '%s'""" % (sBox))
-
+        tRes = cur.fetchall()
         sType = tRes[0].vial_type_desc
         sDescription = tRes[0].box_description
         zplVial = """^XA
@@ -720,16 +735,17 @@ class createBox(util.SafeHandler):
         for iVial in range(NR_OF_VIALS_IN_BOX):
             iCoord = iVial + 1
             sSql = """insert into vialdb.box_positions (box_id, coordinate, update_date)
-                      values (%s, %s, now())"""
-            db.insert(sSql, sBoxId, iCoord)
+                      values (%s, %s, now())""" % (sBoxId, iCoord)
+            sSlask = cur.execute(sSql)
 
     def post(self, *args, **kwargs):
         try:
             sDescription = self.get_argument("description", default='', strip=False)
             sType = self.get_argument("type", default='', strip=False)
             sLocation = self.get_argument("location", default='', strip=False)
-            iVialPk = db.query("""SELECT vial_type from vialdb.vial_type
+            sSlask = cur.execute("""SELECT vial_type from vialdb.vial_type
                                where vial_type_desc = '%s'""" % (sType))[0].vial_type
+            iVialPk = cur.fetchall()
         except:
             logging.error("Error cant find description or type in the argument list")
             logging.error(sDescription)
@@ -739,7 +755,7 @@ class createBox(util.SafeHandler):
         sBox = getNewBoxId()
         sSql = """insert into vialdb.box (box_id, box_description, vial_type,
                   location_id, update_date) values (%s, %s, %s, %s, now())"""
-        db.insert(sSql, sBox, sDescription, iVialPk, sLocation)
+        sSlask = cur.execute(sSql, sBox, sDescription, iVialPk, sLocation)
         self.createVials(sBox, iVialPk)
         self.write(json.dumps({'boxId':sBox,
                                'boxDescription':sDescription}))
@@ -767,17 +783,19 @@ class createBox(util.SafeHandler):
 
 class getFirstEmptyCoordForBox(util.SafeHandler):
     def get(self, sBox):
-        tRes = db.query("""select coordinate from vialdb.box_positions
+        sSlask = cur.execute("""select coordinate from vialdb.box_positions
                            where (vial_id is null or vial_id ='') and box_id = '%s'
                            order by coordinate asc limit 1""" % (sBox))
+        tRes = cur.fetchall()
         self.write(json.dumps(tRes))
                        
 class getBoxOfType(util.SafeHandler):
     def get(self, sBoxType):
-        tRes = db.query("""select distinct(p.box_id)
+        sSlask = cur.execute("""select distinct(p.box_id)
                            from vialdb.box_positions p, vialdb.box b
                            where p.box_id = b.box_id and
                            vial_type = '%s'""" % (sBoxType))
+        tRes = cur.fetchall()
         saRes = []
         for saItem in tRes:
             saRes.append(saItem.box_id)
@@ -786,10 +804,11 @@ class getBoxOfType(util.SafeHandler):
 class updateBox(util.SafeHandler):
     def get(self, sBox):
         self.set_header("Content-Type", "application/json")
-        tRes = db.query("""select box_id, box_description, vial_type_desc
+        sSlask = cur.execute("""select box_id, box_description, vial_type_desc
                   from vialdb.box b, vialdb.vial_type t
                   where b.vial_type = t.vial_type and box_id = '%s'
                """ % (sBox))
+        tRes = cur.fetchall()
         jRes = getBoxFromDb(sBox)
         try:
             jResult = [{'message':'Box type: ' + tRes[0].vial_type_desc + ', Description:' + tRes[0].box_description,
@@ -818,13 +837,14 @@ class searchVials(util.SafeHandler):
             on bbb.box_id = p.box_id where
             b.vial_id = '%s'""" % sId
             try:
-                tRes = db.query(sSql)
+                sSlask = cur.execute(sSql)
             except Exception as e:
                 logging.error("Error: " + str(e))
                 
                 self.set_status(400)
                 self.finish()
                 return
+            tRes = cur.fetchall()
             if len(tRes) != 1:
                 lNotFound.append(sId)
                 jRes.append({"vialId":sId,
@@ -884,7 +904,8 @@ class searchBatches(util.SafeHandler):
             where v.batch_id = %s
             """
         for sId in sIds:
-            tRes = db.query(sSql, sId)
+            sSlask = cur.execute(sSql, sId)
+            tRes = cur.fetchall()
             if len(tRes) == 0:
                 jRes.append({"vialId":sId,
                              "coordinate":'',
@@ -909,16 +930,18 @@ class searchBatches(util.SafeHandler):
 
 class getLocation(util.SafeHandler):
     def get(self, *args, **kwargs):
-        db.execute("SET CHARACTER SET utf8")
+        sSlask = cur.execute("SET CHARACTER SET utf8")
         self.set_header("Content-Type", "application/json;charset=utf-8")
-        tRes = db.query("select vial_location from vialdb.vial_location")
+        sSlask = cur.execute("select vial_location from vialdb.vial_location")
+        tRes = cur.fetchall()
         tRes.insert(0, {'vial_location': u''})
         self.write(json.dumps(tRes, encoding="utf-8"))
 
 class moveVialToLocation(util.SafeHandler):
     def get(self, sVial, sUser):
-        tRes = db.query("""select vial_location from vialdb.vial_location
+        sSlask = cur.execute("""select vial_location from vialdb.vial_location
         where vial_location = '%s'""" % sUser)
+        tRes = cur.fetchall()
         if len(tRes) != 1:
             return
         sUser = tRes[0].vial_location
@@ -937,8 +960,8 @@ class moveVialToLocation(util.SafeHandler):
                   discarded=%s, 
                   update_date=now() 
                   where vial_id=%s 
-               """
-        db.update(sSql, None, sVial)
+               """ % (None, sVial)
+        sSlask = cur.execute(sSql)
 
         # Erase the old place of the vial
         deleteOldVialPosition(sVial)
@@ -946,8 +969,8 @@ class moveVialToLocation(util.SafeHandler):
         sSql = """update vialdb.vial set 
                   checkedout = %s 
                   where vial_id = %s 
-               """
-        db.update(sSql, sUser, sVial)
+               """ % (sUser, sVial)
+        sSlask = cur.execute(sSql)
 
 
 class StaticFileHandler(tornado.web.StaticFileHandler):
