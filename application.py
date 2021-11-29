@@ -31,6 +31,10 @@ cur = db_connection.cursor()
 
 NR_OF_VIALS_IN_BOX = 200
 
+def res_to_json(response, cursor):
+    # TODO
+    return -1
+
 class home(util.UnsafeHandler):
     def get(self, *args, **kwargs):
         #self.set_header('Access-Control-Allow-Origin', '*')
@@ -571,12 +575,13 @@ class vialInfo(util.SafeHandler):
 
         sSql = """SELECT v.vial_id, coordinate, v.batch_id, v.compound_id,
                   b.box_id,box_description, v.tare, discarded, checkedout
-	          from vialdb.vial v left join bcpvs.batch c on v.batch_id = c.batch_id
+	          from vialdb.vial v left join bcpvs.batch c on v.batch_id = c.notebook_ref
                   left join vialdb.box_positions p on v.vial_id = p.vial_id
                   left join vialdb.box b on p.box_id = b.box_id
                   where v.vial_id='%s'""" % sVial
         sSlask = cur.execute(sSql)
         tRes = cur.fetchall()
+        print(cur.description[0][0])
         self.write(json.dumps(tRes))
 
 class getVialTypes(util.SafeHandler):
