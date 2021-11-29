@@ -934,8 +934,11 @@ class getLocation(util.SafeHandler):
         self.set_header("Content-Type", "application/json;charset=utf-8")
         sSlask = cur.execute("select vial_location from vialdb.vial_location")
         tRes = cur.fetchall()
+        tRes = list(tRes)
         tRes.insert(0, {'vial_location': u''})
-        self.write(json.dumps(tRes, encoding="utf-8"))
+        tRes = tuple(tRes)
+        #tRes = {'vial_location': u''}.update(tRes)
+        self.write(json.dumps(tRes, ensure_ascii=False).encode('utf8'))
 
 class moveVialToLocation(util.SafeHandler):
     def get(self, sVial, sUser):
