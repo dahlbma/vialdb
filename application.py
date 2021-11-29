@@ -23,7 +23,7 @@ db_connection = MySQLdb.connect(
     host=config.database['host'],
     user=config.database['user'],
     passwd=config.database['password'],
-    database='chem_reg'
+    database=config.database['db']
 )
 
 db_connection.autocommit(True)

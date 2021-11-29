@@ -22,7 +22,7 @@ db = MySQLdb.connect(
     host=config.database['host'],
     user=config.database['user'],
     passwd=config.database['password'],
-    database='chem_reg'
+    database=config.database['db']
 )
 
 JWT_SECRET = config.secret_key
