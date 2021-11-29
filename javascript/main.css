@@ -1,0 +1,38 @@
+.grid {
+  width: 900px;
+  height: 600px;
+}
+
+.ui-grid-header-cell .ui-grid-cell-contents {
+    height: 48px;
+    white-space: normal;
+    -ms-text-overflow: clip;
+    -o-text-overflow: clip;
+    text-overflow: clip;
+    overflow: visible;
+    font-size: 12px;
+}
+
+.grid .ui-grid-render-container-body .ui-grid-header-cell,
+.grid .ui-grid-render-container-left .ui-grid-header-cell,
+.grid .ui-grid-cell {
+    font-size: 10px;
+}
+
+.grid-align-left {
+    text-align: left;
+}
+
+.loader {
+    border: 5px solid #f3f3f3; /* Light grey */
+    border-top: 5px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
