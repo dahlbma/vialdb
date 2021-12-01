@@ -32,11 +32,9 @@ cur = db_connection.cursor()
 NR_OF_VIALS_IN_BOX = 200
 
 def res_to_json(response, cursor):
-    js = []
-    res = list(response)
-    for i in len(range(res)):
-        js.append((res[i], cursor.description[i]))
-    return js
+    columns = cursor.description 
+    to_js = [{columns[index][0]:column for index, column in enumerate(value)} for value in response]
+    return to_js
 
 class home(util.UnsafeHandler):
     def get(self, *args, **kwargs):
@@ -189,7 +187,7 @@ class getRack(util.SafeHandler):
                                      "compoundId": row[7],
                                      "ssl": sSll,
                                      "iRow" : sRow
-                    })
+                        })
                     iRow += 1
                 except Exception as e:
                     logging.error('Failed at appending ' + sId + ' ' + str(e))
@@ -383,7 +381,7 @@ class getLocations(util.SafeHandler):
         sSlask = cur.execute("""SELECT location_id, location_description from vialdb.box_location
                            order by pk""")
         tRes = cur.fetchall()
-        self.write(json.dumps(tRes, indent=4))
+        self.write(json.dumps(res_to_json(tRes, cur), indent=4))
 
 class searchLocation(util.SafeHandler):
     def get(self, sLocation):
@@ -432,7 +430,7 @@ class verifyVial(util.SafeHandler):
         where  v.vial_id = '%s'
         """ % (sVial))
         tRes = cur.fetchall()
-        self.write(json.dumps(tRes))
+        self.write(json.dumps(res_to_json(tRes, cur)))
 
 class batchInfo(util.SafeHandler):
     def get(self, sBatch):
@@ -449,7 +447,7 @@ class batchInfo(util.SafeHandler):
             self.set_status(400)
             self.finish(sError)
             return
-        self.write(json.dumps(tRes))
+        self.write(json.dumps(res_to_json(tRes, cur)))
 
 class editVial(util.SafeHandler):
     def post(self, *args, **kwargs):
@@ -597,7 +595,7 @@ class getBoxDescription(util.SafeHandler):
     def get(self, sBox):
         sSlask = cur.execute("""SELECT box_description FROM vialdb.box where box_id = '%s'""" % (sBox))
         tRes = cur.fetchall()
-        self.write(json.dumps(tRes))
+        self.write(json.dumps(res_to_json(tRes, cur)))
 
 
 def updateVialType(sBoxId, sVialId):
@@ -794,7 +792,7 @@ class getFirstEmptyCoordForBox(util.SafeHandler):
                            where (vial_id is null or vial_id ='') and box_id = '%s'
                            order by coordinate asc limit 1""" % (sBox))
         tRes = cur.fetchall()
-        self.write(json.dumps(tRes))
+        self.write(json.dumps(res_to_json(tRes, cur)))
                        
 class getBoxOfType(util.SafeHandler):
     def get(self, sBoxType):
@@ -945,7 +943,7 @@ class getLocation(util.SafeHandler):
         tRes.insert(0, {'vial_location': u''})
         tRes = tuple(tRes)
         #tRes = {'vial_location': u''}.update(tRes)
-        self.write(json.dumps(tRes, ensure_ascii=False).encode('utf8'))
+        self.write(json.dumps(res_to_json(tRes, cur), ensure_ascii=False).encode('utf8'))
 
 class moveVialToLocation(util.SafeHandler):
     def get(self, sVial, sUser):
