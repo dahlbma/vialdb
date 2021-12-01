@@ -33,8 +33,9 @@ NR_OF_VIALS_IN_BOX = 200
 
 def res_to_json(response, cursor):
     js = []
-    for i in len(range(response)):
-        js.append((response[i], cursor.description[i]))
+    res = list(response)
+    for i in len(range(res)):
+        js.append((res[i], cursor.description[i]))
     return js
 
 class home(util.UnsafeHandler):
