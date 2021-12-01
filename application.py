@@ -32,8 +32,10 @@ cur = db_connection.cursor()
 NR_OF_VIALS_IN_BOX = 200
 
 def res_to_json(response, cursor):
-    # TODO
-    return -1
+    js = []
+    for i in len(range(response)):
+        js.append((response[i], cursor.description[i]))
+    return js
 
 class home(util.UnsafeHandler):
     def get(self, *args, **kwargs):
@@ -581,8 +583,7 @@ class vialInfo(util.SafeHandler):
                   where v.vial_id='%s'""" % sVial
         sSlask = cur.execute(sSql)
         tRes = cur.fetchall()
-        print(cur.description[0][0])
-        self.write(json.dumps(tRes))
+        self.write(json.dumps(res_to_json(tRes)))
 
 class getVialTypes(util.SafeHandler):
     def get(self, *args, **kwargs):
