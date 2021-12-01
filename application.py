@@ -583,7 +583,7 @@ class vialInfo(util.SafeHandler):
                   where v.vial_id='%s'""" % sVial
         sSlask = cur.execute(sSql)
         tRes = cur.fetchall()
-        self.write(json.dumps(res_to_json(tRes)))
+        self.write(json.dumps(res_to_json(tRes, cur)))
 
 class getVialTypes(util.SafeHandler):
     def get(self, *args, **kwargs):
