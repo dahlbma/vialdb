@@ -510,7 +510,6 @@ class printVial(util.SafeHandler):
         sSlask = cur.execute(sSql)
         tRes = cur.fetchall()
         if len(tRes) > 0:
-            print(tRes[0][1])
             sDate = (time.strftime("%Y-%m-%d"))
             doPrint(tRes[0][1], tRes[0][0], tRes[0][2], sDate, sVial)
             self.finish("Printed")
