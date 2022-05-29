@@ -174,13 +174,13 @@ class getRack(util.SafeHandler):
             for row in tData:
                 try:
                     sSql = """
-                    select notebook_ref from ddd.batch where
-                    notebook_ref = '%s' or notebook_ref = '%s'
+                    select batch_id from ddd.batch where
+                    batch_id = '%s' or batch_id = '%s'
                     """ % ('UU_' + row[0], 'KI_' + row[0]) # matrixId
                     sSlask = cur.execute(sSql)
                     tSsl = cur.fetchall()
                     sSll = None
-                    tSsl = ('test')
+                    #tSsl = ('test')
                     if len(tSsl) != 0:
                         sSll = tSsl
                     else:
@@ -219,7 +219,6 @@ class getRack(util.SafeHandler):
         try:
             sSlask = cur.execute(sSql)
             tRes = cur.fetchall()
-            print(tRes)
         except Exception as e:
             logging.error("Error: " + str(e) + ' problem with rack:' + sRack)
             return
