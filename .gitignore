@@ -1,6 +1,7 @@
 config.py
 mols/
 uploads/
+cert/
 *.sdf
 *.mol
 error_msg.txt

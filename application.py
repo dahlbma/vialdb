@@ -190,15 +190,15 @@ class getRack(util.SafeHandler):
                     else:
                         sRow = str(iRow)
                     jRes.append({"batchId":row[0],
-                                    "tubeId":row[1],
-                                    "volume": row[2],
-                                    "matrixId": row[3],
-                                    "position": str(row[4]),
-                                    "location": str(row[5]),
-                                    "conc": row[6],
-                                    "compoundId": row[7],
-                                    "ssl": sSll,
-                                    "iRow" : sRow
+                                 "tubeId":row[1],
+                                 "volume": row[2],
+                                 "matrixId": row[3],
+                                 "position": str(row[4]),
+                                 "location": str(row[5]),
+                                 "conc": row[6],
+                                 "compoundId": row[7],
+                                 "ssl": sSll,
+                                 "iRow" : sRow
                     })
                     iRow += 1
                 except Exception as e:
@@ -219,6 +219,7 @@ class getRack(util.SafeHandler):
         try:
             sSlask = cur.execute(sSql)
             tRes = cur.fetchall()
+            print(tRes)
         except Exception as e:
             logging.error("Error: " + str(e) + ' problem with rack:' + sRack)
             return
