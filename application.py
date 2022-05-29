@@ -302,16 +302,16 @@ def getNewBoxId():
 
 def deleteOldVialPosition(sVialId):
     sSql = f"""update vialdb.box_positions set
-    vial_id={None},
+    vial_id=NULL,
     update_date=now()
-    where vial_id={sVialId}
+    where vial_id='{sVialId}'
     """
     sSlask = cur.execute(sSql)
 
 def logVialChange(sVialId, sOldPos, sNewPos):
     sSql = f"""
     insert into vialdb.vial_log (vial_id, old_location, new_location)
-    values ({sVialId}, {sOldPos}, {sNewPos})
+    values ('{sVialId}', '{sOldPos}', '{sNewPos}')
     """
     sSlask = cur.execute(sSql)
 
@@ -319,14 +319,14 @@ def getVialPosition(sVialId):
     sSql = f"""select IFNULL(b.box_id, '') box_id, IFNULL(b.coordinate, '') coordinate, v.checkedout
     from vialdb.vial v
     left outer join vialdb.box_positions b on v.vial_id = b.vial_id
-    where v.vial_id={sVialId}
+    where v.vial_id='{sVialId}'
     """
     sSlask = cur.execute(sSql)
     tRes = cur.fetchall()
     logging.info(tRes)
     if len(tRes) == 0:
         return '', '', ''
-    return str(tRes[0].box_id).upper(), str(tRes[0].coordinate), tRes[0].checkedout
+    return str(tRes[0][0]).upper(), str(tRes[0][1]), tRes[0][2]
 
 def getBoxFromDb(sBox):
     sSlask = cur.execute("""SELECT v.vial_id vialId, coordinate, batch_id batchId, compound_id compoundId,
@@ -480,15 +480,15 @@ class editVial(util.SafeHandler):
 
         sSql = """
         update vialdb.vial set
-        batch_id = %s,
-        compound_id = %s,
+        batch_id = '%s',
+        compound_id = '%s',
         vial_type = %s,
         update_date = now(),
         tare = %s,
         net = %s,
         gross = %s,
         dilution = %s
-        where vial_id = %s
+        where vial_id = '%s'
         """ % (sBatch, sCompoundId, sBoxType, sTare, sNetWeight, sGross, iDilutionFactor, sVial)
 
         try:
@@ -643,11 +643,11 @@ class updateVialPosition(util.SafeHandler):
 
         # Check if the position already is occupied by another compound
         sSql = """select vial_id from vialdb.box_positions
-                  where box_id=%s and coordinate=%s
+                  where box_id='%s' and coordinate=%s
                """ % (sBoxId, iCoordinate)
         sSlask = cur.execute(sSql)
         tRes = cur.fetchall()
-        if len(tRes) != 1 or tRes[0].vial_id != None:
+        if len(tRes) != 1 or tRes[0][0] != None:
             self.set_status(400)
             jRes = getBoxFromDb(sBoxId)
             logging.error('this position is occupied ' + sBoxId + ' ' + iCoordinate)
@@ -659,7 +659,7 @@ class updateVialPosition(util.SafeHandler):
         # Check if the vial has the same type as the box to be placed in
         sSql = """select v.vial_type
                   from vialdb.box b, vialdb.vial v
-                  where (b.vial_type = v.vial_type or v.vial_type is null) and vial_id = %s and box_id = %s
+                  where (b.vial_type = v.vial_type or v.vial_type is null) and vial_id = '%s' and box_id = '%s'
                """ % (sVialId, sBoxId)
         sSlask = cur.execute(sSql)
         tRes = cur.fetchall()
@@ -690,18 +690,18 @@ class updateVialPosition(util.SafeHandler):
 
         # Update the new location of the vial
         sSql = """update vialdb.box_positions set
-                  vial_id=%s,
+                  vial_id='%s',
                   update_date=now()
-                  where box_id=%s and coordinate=%s
+                  where box_id='%s' and coordinate=%s
                """ % (sVialId, sBoxId, iCoordinate)
         sSlask = cur.execute(sSql)
 
         # Make sure that the vial isn't checkedout anymore
         sSql = """update vialdb.vial set
-                  checkedout=%s,
+                  checkedout=NULL,
                   update_date=now()
-                  where vial_id=%s
-               """ % (None, sVialId)
+                  where vial_id='%s'
+               """ % (sVialId)
         sSlask = cur.execute(sSql)
 
         jRes = getBoxFromDb(sBoxId)
