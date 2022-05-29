@@ -1,0 +1,89 @@
+Label Automator® with Weighing Option (version 5.20)
+
+Start Time:	11/11/2015 09:03
+Log File:  	201506010903.LOG
+Process File:	C:\Bohdan\Automator\Proc\GLASS\Glass.prc
+Operator ID:	Kalle
+
+[GLOBAL SAMPLE PARAMETERS]
+--- <Rack Location #01> 4 ml  Rack F1
+    Rack ID: 150601-F1
+    Sample Input File: C:\Bohdan\Automator\Proc\GLASS\Input\KI10.smp
+--- <Rack Location #02> 4 ml  Rack F2
+    Rack ID: 150601-F2
+    Sample Input File: C:\Bohdan\Automator\Proc\GLASS\Input\KI10.smp
+--- <Rack Location #03> 4 ml  Rack F3
+    Rack ID: 150601-F3
+    Sample Input File: C:\Bohdan\Automator\Proc\GLASS\Input\KI10.smp
+--- <Rack Location #04> 4 ml  Rack F4
+    Rack ID: 150601-F4
+    Sample Input File: C:\Bohdan\Automator\Proc\GLASS\Input\KI10.smp
+--- <Rack Location #05> 4 ml  Rack B1
+    Rack ID: 150601-B1
+    Sample Input File: C:\Bohdan\Automator\Proc\GLASS\Input\KI10.smp
+--- <Rack Location #06> 4 ml  Rack B2
+    Rack ID: 150601-B2
+    Sample Input File: C:\Bohdan\Automator\Proc\GLASS\Input\KI10.smp
+--- <Rack Location #07> 4 ml  Rack B3
+    Rack ID: 150601-B3
+    Sample Input File: C:\Bohdan\Automator\Proc\GLASS\Input\KI10.smp
+--- <Rack Location #08> 4 ml  Rack B4
+    Rack ID: 150601-B4
+    Sample Input File: C:\Bohdan\Automator\Proc\GLASS\Input\KI10.smp
+
+Report Format: In
+
+[WEIGHT FORMAT]
+Weight Unit: g
+Weight Range: Coarse
+ 
+[LABEL AND WEIGH]
+Labeler Setup File: C:\Bohdan\Automator\Proc\GLASS\16mm.par
+ 
+bar code            	weight#1            	rack id             	sample position     
+V205497	4.90157	160307-F1           	1
+V205496	4.79566	160307-F1           	2
+V205495	4.89584	160307-F1           	3
+V205494	4.88892	160307-F1           	4
+V205493	4.87665	160307-F1           	5
+V205492	4.8785	160307-F1           	6
+V205491	4.8502	160307-F1           	7
+V205490	4.85092	160307-F1           	8
+V205489	4.91524	160307-F1           	9
+V205488	4.87322	160307-F1           	10
+V205487	4.89303	160307-F1           	11
+V205486	4.95607	160307-F1           	12
+V205485	4.86851	160307-F1           	13
+V205484	4.94394	160307-F1           	14
+V205483	4.84349	160307-F1           	15
+V205482	4.88928	160307-F1           	16
+V205481	4.88574	160307-F1           	17
+V205480	4.90861	160307-F1           	18
+V205479	4.93724	160307-F1           	19
+V205478	4.87886	160307-F1           	20
+V205477	4.88232	160307-F1           	21
+V205476	4.86571	160307-F1           	22
+V205475	4.86489	160307-F1           	23
+V205474	4.93461	160307-F1           	24
+V205473	4.87674	160307-F2           	1
+V205472	4.91297	160307-F2           	2
+V205471	4.8597	160307-F2           	3
+V205470	4.83706	160307-F2           	4
+V205469	4.8884	160307-F2           	5
+V205468	4.97096	160307-F2           	6
+V205467	4.87166	160307-F2           	7
+V205466	4.83949	160307-F2           	8
+V205465	4.91669	160307-F2           	9
+V205464	5.01401	160307-F2           	10
+V205463	4.84751	160307-F2           	11
+V205546	4.89163	160307-F2           	12
+V205547	4.88702	160307-F2           	13
+V205548	4.83743	160307-F2           	14
+V205549	4.84851	160307-F2           	15
+V205550	4.97871	160307-F2           	16
+V205551	4.9819	160307-F2           	17
+V205552	4.86598	160307-F2           	18
+End Time:	11/11/2015 13:47
+
+
+Signature: ____________________________________

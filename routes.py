@@ -43,6 +43,7 @@ class Application(tornado.web.Application):
         handlers = [
             (r"/", application.home),
             (r"/static/(.*)", util.SafeStaticFileHandler, {"path": "static/"}),
+            (r"/pingDB", application.PingDB),
             (r"/javascript/(.*)", tornado.web.StaticFileHandler, {"path": "javascript/"}),
             (r'/(favicon.ico)', tornado.web.StaticFileHandler, {"path": "static/"}),
             ("/login",util.LoginHandler),

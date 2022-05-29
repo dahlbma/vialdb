@@ -184,12 +184,13 @@ class LoginHandler(tornado.web.RequestHandler):
             url = "/unauthorized?email={0}&contact={1}".format(username,
                         self.application.settings['contact_person'])
             self.redirect(url)
+            return
         payload = {
             'username': username,
             'exp': datetime.utcnow() + timedelta(seconds=JWT_EXP_DELTA_SECONDS)
         }
         jwt_token = jwt.encode(payload, JWT_SECRET, JWT_ALGORITHM)
-        print(username)
+        logging.info(username + ' logging in')
         self.set_cookie('username', username)
         self.set_secure_cookie('token', jwt_token)
     

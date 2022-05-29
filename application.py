@@ -36,6 +36,12 @@ def res_to_json(response, cursor):
     to_js = [{columns[index][0]:column for index, column in enumerate(value)} for value in response]
     return to_js
 
+class PingDB(tornado.web.RequestHandler):
+    def get(self):
+        sSql = "select * from vialdb.box where pk = 0"
+        cur.execute(sSql)
+
+
 class home(util.UnsafeHandler):
     def get(self, *args, **kwargs):
         #self.set_header('Access-Control-Allow-Origin', '*')
@@ -47,6 +53,10 @@ class home(util.UnsafeHandler):
 
 class getMicroTubeByBatch(util.SafeHandler):
     def get(self, sBatches):
+        if len(sBatches) < 1:
+            logging.info("no batch")
+            self.write(json.dumps({}))
+            return
         saBatches = sBatches.split()
         saBatches = list(set(saBatches))
         logging.info(saBatches)
@@ -75,7 +85,7 @@ class getMicroTubeByBatch(util.SafeHandler):
             sSql = """select
                       t.notebook_ref as batchId, t.tube_id as tubeId, t.volume*1000000 as volume,
                       m.matrix_id as matrixId, mt.position as position, m.location as location
-                      from microtube.v_tube t, microtube.v_matrix_tube mt, microtube.v_matrix m
+                      from microtube.tube t, microtube.v_matrix_tube mt, microtube.v_matrix m
                       where
                       t.tube_id = mt.tube_id and
                       m.matrix_id = mt.matrix_id and
@@ -164,30 +174,32 @@ class getRack(util.SafeHandler):
             for row in tData:
                 try:
                     sSql = """
-                    select compound_id from bcpvs.batch where
-                    batch_id = '%s' or batch_id = '%s'
-                    """ % ('UU_' + row[0], 'KI_' + row[0])
+                    select notebook_ref from ddd.batch where
+                    notebook_ref = '%s' or notebook_ref = '%s'
+                    """ % ('UU_' + row[0], 'KI_' + row[0]) # matrixId
                     sSlask = cur.execute(sSql)
                     tSsl = cur.fetchall()
-                    if len(tSsl) == 0:
-                        sSll = ''
+                    sSll = None
+                    tSsl = ('test')
+                    if len(tSsl) != 0:
+                        sSll = tSsl
                     else:
-                        if iRow < 10:
-                            sRow = '0' + str(iRow)
-                        else:
-                            sRow = str(iRow)
-                        sSll = tSsl[0].compound_id
-                        jRes.append({"batchId":row[0],
-                                     "tubeId":row[1],
-                                     "volume": row[2],
-                                     "matrixId": row[3],
-                                     "position": str(row[4]),
-                                     "location": str(row[5]),
-                                     "conc": row[6],
-                                     "compoundId": row[7],
-                                     "ssl": sSll,
-                                     "iRow" : sRow
-                        })
+                        sSll = ''
+                    if iRow < 10:
+                        sRow = '0' + str(iRow)
+                    else:
+                        sRow = str(iRow)
+                    jRes.append({"batchId":row[0],
+                                    "tubeId":row[1],
+                                    "volume": row[2],
+                                    "matrixId": row[3],
+                                    "position": str(row[4]),
+                                    "location": str(row[5]),
+                                    "conc": row[6],
+                                    "compoundId": row[7],
+                                    "ssl": sSll,
+                                    "iRow" : sRow
+                    })
                     iRow += 1
                 except Exception as e:
                     logging.error('Failed at appending ' + sId + ' ' + str(e))
@@ -198,9 +210,9 @@ class getRack(util.SafeHandler):
                   t.notebook_ref as batchId, t.tube_id as tubeId, t.volume*1000000 as volume,
                   m.matrix_id as matrixId, mt.position as position, m.location as location,
                   t.conc * 1000, compound_id, SUBSTR(mt.position, 2,3) as rackrow
-                  from microtube.v_tube t, microtube.v_matrix_tube mt, microtube.v_matrix m , bcpvs.batch b
+                  from microtube.tube t, microtube.v_matrix_tube mt, microtube.v_matrix m , bcpvs.batch b
                   where
-                  t.notebook_ref   = b.notebook_ref(+)  and
+                  t.notebook_ref  = b.notebook_ref and
                   t.tube_id = mt.tube_id and
                   m.matrix_id = mt.matrix_id and
                   mt.matrix_id = '%s' order by rackrow, position""" % sRack
@@ -317,25 +329,29 @@ def getVialPosition(sVialId):
     return str(tRes[0].box_id).upper(), str(tRes[0].coordinate), tRes[0].checkedout
 
 def getBoxFromDb(sBox):
-    sSlask = cur.execute("""SELECT v.vial_id, coordinate, batch_id, compound_id,
-                       b.box_id, box_description
+    sSlask = cur.execute("""SELECT v.vial_id vialId, coordinate, batch_id batchId, compound_id compoundId,
+                       b.box_id boxId, box_description boxDescription
                        from vialdb.box b
                        left join vialdb.box_positions v on b.box_id = v.box_id
                        left join vialdb.vial c on v.vial_id = c.vial_id
                        where b.box_id = '%s' order by coordinate asc""" % (sBox))
     tRes = cur.fetchall()
-    jRes = []
-    for row in tRes:
-        jRes.append({"vialId":row.vial_id,
-                     "coordinate":row.coordinate,
-                     "batchId":row.batch_id,
-                     "compoundId":row.compound_id,
-                     "boxId":row.box_id,
-                     "boxDescription":row.box_description})
-    return jRes
+    #jRes = []
+    #for row in tRes:
+    #    jRes.append({"vialId":row.vial_id,
+    #                 "coordinate":row.coordinate,
+    #                 "batchId":row.batch_id,
+    #                 "compoundId":row.compound_id,
+    #                 "boxId":row.box_id,
+    #                 "boxDescription":row.box_description})
+    return res_to_json(tRes, cur)#jRes
 
 def doPrint(sCmp, sBatch, sType, sDate, sVial):
     zplVial = """^XA
+^MMT
+^PW400
+^LL0064
+^LS210
 ^CFA,20
 ^A0,25,20
 ^FO300,20^FDCmp: %s^FS
@@ -386,19 +402,19 @@ class getLocations(util.SafeHandler):
 class searchLocation(util.SafeHandler):
     def get(self, sLocation):
         self.set_header("Content-Type", "application/json")
-        sSlask = cur.execute("""SELECT l.location_id, location_description, box_id, box_description
+        sSlask = cur.execute("""SELECT l.location_id as locId, location_description as locDescription, box_id as boxId, box_description as boxDescription
                            from vialdb.box_location l
                  	   left join vialdb.box b
                            on l.location_id = b.location_id
                            where l.location_id = '%s'""" % (sLocation))
         tRes = cur.fetchall()
-        jRes = []
-        for row in tRes:
-            jRes.append({"locId":row.location_id,
-                         "locDescription":row.location_description,
-                         "boxId":row.box_id,
-                         "boxDescription":row.box_description})
-        self.write(json.dumps(jRes))
+        #jRes = []
+        #for row in tRes:
+        #    jRes.append({"locId":row.location_id,
+        #                 "locDescription":row.location_description,
+        #                 "boxId":row.box_id,
+        #                 "boxDescription":row.box_description})
+        self.write(json.dumps(res_to_json(tRes, cur)))
 
 class verifyVial(util.SafeHandler):
     def get(self, sVial):
@@ -412,7 +428,7 @@ class verifyVial(util.SafeHandler):
             logging.error(sError)
             logging.error(tRes)
             #elif tRes[0]['vial_type'] not in (None, '', 0):
-        elif len(str(tRes[0]['batch_id'])) > 4:
+        elif len(str(tRes[0][0])) > 4:
             #lError = True
             sError = 'Vial already checked in ' + sVial
       
@@ -426,7 +442,7 @@ class verifyVial(util.SafeHandler):
         sSlask = cur.execute("""SELECT v.vial_id sVial, v.batch_id, v.vial_type,
         b.compound_id, v.tare, batch_formula_weight, net iNetWeight, gross iGross, dilution iDilutionFactor
         from vialdb.vial v
-        left outer join bcpvs.batch b on v.batch_id = b.batch_id
+        left outer join ddd.batch b on v.batch_id = b.batch_id
         where  v.vial_id = '%s'
         """ % (sVial))
         tRes = cur.fetchall()
@@ -436,7 +452,7 @@ class batchInfo(util.SafeHandler):
     def get(self, sBatch):
         sSlask = cur.execute("""SELECT b.batch_id,
                            b.compound_id, batch_formula_weight
-                           from bcpvs.batch b
+                           from ddd.batch b
                            where b.batch_id = '%s'
                            """ % (sBatch))
         tRes = cur.fetchall()
@@ -489,13 +505,14 @@ class printVial(util.SafeHandler):
         sSql = """
                select batch_id, compound_id, vial_type_desc
                from vialdb.vial_type vt, vialdb.vial v
-               where v.vial_id=%s and v.vial_type = vt.vial_type
+               where v.vial_id='%s' and v.vial_type = vt.vial_type
         """ % (sVial)
         sSlask = cur.execute(sSql)
         tRes = cur.fetchall()
         if len(tRes) > 0:
+            print(tRes[0][1])
             sDate = (time.strftime("%Y-%m-%d"))
-            doPrint(tRes[0].compound_id, tRes[0].batch_id, tRes[0].vial_type_desc, sDate, sVial)
+            doPrint(tRes[0][1], tRes[0][0], tRes[0][2], sDate, sVial)
             self.finish("Printed")
             return
 
@@ -589,7 +606,7 @@ class getVialTypes(util.SafeHandler):
         sSlask = cur.execute("""SELECT vial_type, vial_type_desc, concentration from vialdb.vial_type
                            order by vial_order asc""")
         tRes = cur.fetchall()
-        self.write(json.dumps(tRes))
+        self.write(json.dumps(res_to_json(tRes, cur)))
 
 class getBoxDescription(util.SafeHandler):
     def get(self, sBox):
@@ -605,7 +622,7 @@ def updateVialType(sBoxId, sVialId):
     sSql = """update vialdb.vial set
               vial_type = %s
               where vial_id = %s
-           """ % (tType[0].vial_type, sVialId)
+           """ % (tType[0][0], sVialId)
     sSlask = cur.execute(sSql)
 
     
@@ -657,7 +674,7 @@ class updateVialPosition(util.SafeHandler):
             self.finish(json.dumps(jResult))
             return
 
-        if tRes[0].vial_type == None:
+        if tRes[0][0] == None:
             updateVialType(sBoxId, sVialId)
             logging.error('Please update vialtype here to same as the box ' + sVialId + ' ' + sBoxId)
             
@@ -691,20 +708,20 @@ class updateVialPosition(util.SafeHandler):
         jRes = getBoxFromDb(sBoxId)
         #self.finish(json.dumps(jRes))
 
-        sSlask = cur.execute("""SELECT v.vial_id, coordinate, batch_id, compound_id,
-                       b.box_id, box_description
+        sSlask = cur.execute("""SELECT v.vial_id as vialId, coordinate, batch_id as batchId, compound_id as compoundId,
+                       b.box_id as boxId, box_description as boxDescription
                        from vialdb.box b
                        left join vialdb.box_positions v on b.box_id = v.box_id
                        left join vialdb.vial c on v.vial_id = c.vial_id
                        where b.box_id = '%s' and coordinate = '%s'""" % (sBoxId, iCoordinate))
         tRes = cur.fetchall()
-        jRes = {"vialId":tRes[0].vial_id,
-                "coordinate":tRes[0].coordinate,
-                "batchId":tRes[0].batch_id,
-                "compoundId":tRes[0].compound_id,
-                "boxId":tRes[0].box_id,
-                "boxDescription":tRes[0].box_description}
-        self.finish(json.dumps(jRes))
+        #jRes = {"vialId":tRes[0].vial_id,
+        #        "coordinate":tRes[0].coordinate,
+        #        "batchId":tRes[0].batch_id,
+        #        "compoundId":tRes[0].compound_id,
+        #        "boxId":tRes[0].box_id,
+        #        "boxDescription":tRes[0].box_description}
+        self.finish(json.dumps(res_to_json(tRes, cur)))
 
 
 class printBox(util.SafeHandler):
@@ -712,9 +729,13 @@ class printBox(util.SafeHandler):
         sSlask = cur.execute("""select box_description, vial_type_desc from vialdb.box b, vialdb.vial_type v
                   where b.vial_type=v.vial_type and box_id = '%s'""" % (sBox))
         tRes = cur.fetchall()
-        sType = tRes[0].vial_type_desc
-        sDescription = tRes[0].box_description
+        sType = tRes[0][1]
+        sDescription = tRes[0][0]
         zplVial = """^XA
+^MMT
+^PW400
+^LL0064
+^LS210
 ^CFA,20
 ^A0,25,20
 ^FO295,20^FDBox: %s^FS
@@ -765,6 +786,10 @@ class createBox(util.SafeHandler):
         self.write(json.dumps({'boxId':sBox,
                                'boxDescription':sDescription}))
         zplVial = """^XA
+^MMT
+^PW400
+^LL0064
+^LS210
 ^CFA,20
 ^A0,25,20
 ^FO295,20^FDBox: %s^FS
@@ -801,10 +826,10 @@ class getBoxOfType(util.SafeHandler):
                            where p.box_id = b.box_id and
                            vial_type = '%s'""" % (sBoxType))
         tRes = cur.fetchall()
-        saRes = []
-        for saItem in tRes:
-            saRes.append(saItem.box_id)
-        self.write(json.dumps(saRes))
+        #saRes = []
+        #for saItem in tRes:
+        #    saRes.append(saItem.box_id)
+        self.write(json.dumps(res_to_json(tRes, cur)))
 
 class updateBox(util.SafeHandler):
     def get(self, sBox):
@@ -816,7 +841,7 @@ class updateBox(util.SafeHandler):
         tRes = cur.fetchall()
         jRes = getBoxFromDb(sBox)
         try:
-            jResult = [{'message':'Box type: ' + tRes[0].vial_type_desc + ', Description:' + tRes[0].box_description,
+            jResult = [{'message':'Box type:' + tRes[0][2] + ', Description:' + tRes[0][1],
                         'data':jRes}]
             self.write(json.dumps(jResult))
         except:
@@ -830,14 +855,21 @@ class searchVials(util.SafeHandler):
         jRes = []
         lNotFound = list()
         for sId in sIds:
-            sSql = """SELECT b.batch_id, b.compound_id, bbb.box_description as box_id , p.coordinate, b.vial_id,
-            bb.batch_formula_weight, bb.batch_salt, b.dilution, bb.cbk_id
+            sSql = """SELECT b.batch_id as batchId,
+            b.compound_id as compoundId,
+            bbb.box_id as boxId,
+            bbb.box_description as boxDescription,
+            p.coordinate, b.vial_id as vialId,
+            ddd.batch_formula_weight as batchMolWeight,
+            ddd.batch_salt as salt,
+            b.dilution,
+            ddd.cbk_id as cbkId
             FROM
             vialdb.vial b
             left outer join vialdb.box_positions p
             on b.vial_id = p.vial_id
-            left outer join bcpvs.batch bb
-            on b.batch_id = bb.batch_id
+            left outer join ddd.batch ddd
+            on b.batch_id = ddd.batch_id 
             left outer join vialdb.box bbb 
             on bbb.box_id = p.box_id where
             b.vial_id = '%s'""" % sId
@@ -862,17 +894,17 @@ class searchVials(util.SafeHandler):
                              "salt":'',
                              "dilution":''})
                 continue
-            for row in tRes:
-                jRes.append({"vialId":row.vial_id,
-                             "coordinate":row.coordinate,
-                             "batchId":row.batch_id,
-                             "compoundId":row.compound_id,
-                             "cbkId":row.cbk_id,
-                             "boxId":row.box_id,
-                             "batchMolWeight":row.batch_formula_weight,
-                             "salt":row.batch_salt,
-                             "dilution":row.dilution})
-
+            #for row in tRes:
+            #    jRes.append({"vialId":row.vial_id,
+            #                 "coordinate":row.coordinate,
+            #                 "batchId":row.batch_id,
+            #                 "compoundId":row.compound_id,
+            #                 "cbkId":row.cbk_id,
+            #                 "boxId":row.box_id,
+            #                 "batchMolWeight":row.batch_formula_weight,
+            #                 "salt":row.batch_salt,
+            #                 "dilution":row.dilution})
+            jRes.append(res_to_json(tRes, cur)[0])
         self.finish(json.dumps(jRes))
 
 
@@ -880,36 +912,42 @@ class searchBatches(util.SafeHandler):
     def get(self, sBatches):
         sIds = sBatches.split()
         jRes = []
-
-        tmpIds = ""
-        for sId in sIds:
-            tmpIds += "'" + sId + "'"
-        stringIds = tmpIds.replace("''", "','")
         if sIds[0].startswith('SLL-'):
-            sSql = """SELECT b.batch_id, b.compound_id, bb.cbk_id, bbb.box_description as box_id,
-                      p.coordinate, b.vial_id, bb.batch_formula_weight, bb.batch_salt
-                      FROM vialdb.vial b, vialdb.box_positions p, bcpvs.batch bb, vialdb.box as bbb
-                      where b.vial_id = p.vial_id and
-                      bb.batch_id = b.batch_id and bbb.box_id = p.box_id and
-		      b.compound_id = %s
-            """
-        else:
             sSql = """
-            SELECT v.batch_id, bb.compound_id, bb.cbk_id, bbb.box_description as box_id,
-            b.coordinate, v.vial_id, batch_formula_weight, batch_salt,
-            bb.batch_formula_weight, bb.batch_salt
+            SELECT v.batch_id batchId, bb.cbk_id cbkId, bb.compound_id compoundId, bbb.box_description as boxId,
+            b.coordinate, v.vial_id vialId, batch_formula_weight batchMolWeight, batch_salt salt
+            #v.batch_id, bb.cbk_id, bb.compound_id, bbb.box_description as box_id,
+            #b.coordinate, v.vial_id, batch_formula_weight, batch_salt,
+            #bb.batch_formula_weight, bb.batch_salt
             FROM
             vialdb.vial v
-            inner join bcpvs.batch bb
+            inner join ddd.batch bb
             on v.batch_id = bb.batch_id
             left join vialdb.box_positions b
             on v.vial_id = b.vial_id
             left join vialdb.box bbb 
             on b.box_id = bbb.box_id
-            where v.batch_id = %s
+            where
+            v.compound_id ='%s'
+            """
+        else:
+            sSql = """
+            SELECT v.batch_id batchId, bb.cbk_id cbkId, bb.compound_id compoundId, bbb.box_description as boxId,
+            b.coordinate, v.vial_id vialId, batch_formula_weight batchMolWeight, batch_salt salt
+            FROM
+            vialdb.vial v
+            inner join ddd.batch bb
+            on v.batch_id = bb.batch_id
+            left join vialdb.box_positions b
+            on v.vial_id = b.vial_id
+            left join vialdb.box bbb 
+            on b.box_id = bbb.box_id
+            where v.batch_id = '%s'
             """
         for sId in sIds:
-            sSlask = cur.execute(sSql, sId)
+            print(sSql)
+            print(sId)
+            sSlask = cur.execute(sSql % (sId))
             tRes = cur.fetchall()
             if len(tRes) == 0:
                 jRes.append({"vialId":sId,
@@ -921,16 +959,16 @@ class searchBatches(util.SafeHandler):
                              "batchMolWeight":'',
                              "salt":''})
                 continue
-            for row in tRes:
-                jRes.append({"vialId":row.vial_id,
-                             "coordinate":row.coordinate,
-                             "batchId":row.batch_id,
-                             "compoundId":row.compound_id,
-                             "cbkId":row.cbk_id,
-                             "boxId":row.box_id,
-                             "batchMolWeight":row.batch_formula_weight,
-                             "salt":row.batch_salt})
-
+            #for row in tRes:
+            #    jRes.append({"vialId":row.vial_id,
+            #                 "coordinate":row.coordinate,
+            #                 "batchId":row.batch_id,
+            #                 "compoundId":row.compound_id,
+            #                 "cbkId":row.cbk_id,
+            #                 "boxId":row.box_id,
+            #                 "batchMolWeight":row.batch_formula_weight,
+            #                 "salt":row.batch_salt})
+            jRes.append(res_to_json(tRes, cur)[0])
         self.finish(json.dumps(jRes))
 
 class getLocation(util.SafeHandler):

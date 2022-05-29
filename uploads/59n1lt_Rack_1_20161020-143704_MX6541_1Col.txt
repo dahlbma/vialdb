@@ -1,0 +1,98 @@
+Date & time of Trace = 20 okt 2016 02:37:04 PM
+Rack Base Name: MX6541
+  A01;	2005156134
+  A02;	2004899003
+  A03;	2005141968
+  A04;	No TrakMate
+  A05;	No TrakMate
+  A06;	No TrakMate
+  A07;	No TrakMate
+  A08;	No TrakMate
+  A09;	No TrakMate
+  A10;	No TrakMate
+  A11;	No TrakMate
+  A12;	No TrakMate
+  B01;	2009107003
+  B02;	2004899050
+  B03;	2009102305
+  B04;	No TrakMate
+  B05;	No TrakMate
+  B06;	No TrakMate
+  B07;	No TrakMate
+  B08;	No TrakMate
+  B09;	No TrakMate
+  B10;	No TrakMate
+  B11;	No TrakMate
+  B12;	No TrakMate
+  C01;	2009107027
+  C02;	2004899063
+  C03;	2009101939
+  C04;	No TrakMate
+  C05;	No TrakMate
+  C06;	No TrakMate
+  C07;	No TrakMate
+  C08;	No TrakMate
+  C09;	No TrakMate
+  C10;	No TrakMate
+  C11;	No TrakMate
+  C12;	No TrakMate
+  D01;	2004863879
+  D02;	2009153491
+  D03;	2009109081
+  D04;	No TrakMate
+  D05;	No TrakMate
+  D06;	No TrakMate
+  D07;	No TrakMate
+  D08;	No TrakMate
+  D09;	No TrakMate
+  D10;	No TrakMate
+  D11;	No TrakMate
+  D12;	No TrakMate
+  E01;	2004863891
+  E02;	2009152267
+  E03;	2004899203
+  E04;	No TrakMate
+  E05;	No TrakMate
+  E06;	No TrakMate
+  E07;	No TrakMate
+  E08;	No TrakMate
+  E09;	No TrakMate
+  E10;	No TrakMate
+  E11;	No TrakMate
+  E12;	No TrakMate
+  F01;	2009141079
+  F02;	2009142719
+  F03;	2009108263
+  F04;	No TrakMate
+  F05;	No TrakMate
+  F06;	No TrakMate
+  F07;	No TrakMate
+  F08;	No TrakMate
+  F09;	No TrakMate
+  F10;	No TrakMate
+  F11;	No TrakMate
+  F12;	No TrakMate
+  G01;	2005152928
+  G02;	2009141262
+  G03;	No TrakMate
+  G04;	No TrakMate
+  G05;	No TrakMate
+  G06;	No TrakMate
+  G07;	No TrakMate
+  G08;	No TrakMate
+  G09;	No TrakMate
+  G10;	No TrakMate
+  G11;	No TrakMate
+  G12;	No TrakMate
+  H01;	2004899168
+  H02;	2005127562
+  H03;	No TrakMate
+  H04;	No TrakMate
+  H05;	No TrakMate
+  H06;	No TrakMate
+  H07;	No TrakMate
+  H08;	No TrakMate
+  H09;	No TrakMate
+  H10;	No TrakMate
+  H11;	No TrakMate
+  H12;	No TrakMate
