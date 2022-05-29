@@ -261,7 +261,7 @@ class uploadEmptyVials(util.SafeHandler):
                     sTare = ''.join(saLine[1].split())
                     try:
                         sSql = f"""insert into vialdb.vial (vial_id, tare, update_date) 
-                                   values ({sVial}, {sTare}, now())"""
+                                   values ('{sVial}', {sTare}, now())"""
                         sSlask = cur.execute(sSql)
                         iOk += 1
                     except:
@@ -270,7 +270,7 @@ class uploadEmptyVials(util.SafeHandler):
                         sSql = f"""update vialdb.vial set
                         tare = {sTare},
                         update_date = now()
-                        where vial_id = {sVial}
+                        where vial_id = '{sVial}'
                         """
                         logging.info("Upload vial: " + sVial + ' Tare: ' + sTare)
                         sSlask = cur.execute(sSql)
@@ -284,7 +284,7 @@ def getNewLocationId():
     if len(tRes) == 0:
         iKey = 0
     else:
-        iKey = tRes[0].pk
+        iKey = tRes[0][0]
     sKey = '%05d' % (iKey + 1)
     sLoc = 'DP' + sKey
     return sLoc
@@ -295,7 +295,7 @@ def getNewBoxId():
     if len(tRes) == 0:
         iKey = 0
     else:
-        iKey = tRes[0].pk
+        iKey = tRes[0][0]
     sKey = '%05d' % (iKey + 1)
     sLoc = 'DB' + sKey
     return sLoc
@@ -386,7 +386,7 @@ class createLocation(util.SafeHandler):
             return
         sLoc = getNewLocationId()
         sSql = f"""insert into vialdb.box_location (location_id, location_description, update_date)
-                  values ({sLoc}, {sDescription}, now())"""
+                  values ('{sLoc}', '{sDescription}', now())"""
         sSlask = cur.execute(sSql)
         self.write(json.dumps({'locId':sLoc,
                                'locDescription':sDescription}))
@@ -517,7 +517,7 @@ class printVial(util.SafeHandler):
 
 def getNextVialId():
     sTmp = "V%"
-    sSql = """select vial_id from vialdb.vial where vial_id like %s
+    sSql = """select vial_id from vialdb.vial where vial_id like '%s'
               order by LENGTH(vial_id) DESC, vial_id desc limit 1""" % (sTmp)
     sSlask =  cur.execute(sSql)
     sVial = cur.fetchall()
@@ -569,10 +569,10 @@ class generateVialId(util.SafeHandler):
 class discardVial(util.SafeHandler):
     def get(self, sVial):
         sSql = """update vialdb.box_positions set vial_id=%s, update_date=now()
-                  where vial_id=%s""" % (None, sVial)
+                  where vial_id='%s'""" % (None, sVial)
         sSlask = cur.execute(sSql)
         sSql = """update vialdb.vial set discarded='Discarded', update_date=now(), checkedout=%s
-                  where vial_id=%s""" % (None, sVial)
+                  where vial_id='%s'""" % (None, sVial)
         sSlask = cur.execute(sSql)
         logVialChange(sVial, '', 'Discarded')
         self.finish()
@@ -615,12 +615,12 @@ class getBoxDescription(util.SafeHandler):
 
 
 def updateVialType(sBoxId, sVialId):
-    sSql = """ SELECT vial_type FROM vialdb.box where box_id = %s """ % (sBoxId)
+    sSql = """ SELECT vial_type FROM vialdb.box where box_id = '%s'""" % (sBoxId)
     sSlask = cur.execute(sSql)
     tType = cur.fetchall()
     sSql = """update vialdb.vial set
               vial_type = %s
-              where vial_id = %s
+              where vial_id = '%s'
            """ % (tType[0][0], sVialId)
     sSlask = cur.execute(sSql)
 
@@ -760,7 +760,7 @@ class createBox(util.SafeHandler):
         for iVial in range(NR_OF_VIALS_IN_BOX):
             iCoord = iVial + 1
             sSql = """insert into vialdb.box_positions (box_id, coordinate, update_date)
-                      values (%s, %s, now())""" % (sBoxId, iCoord)
+                      values ('%s', %s, now())""" % (sBoxId, iCoord)
             sSlask = cur.execute(sSql)
 
     def post(self, *args, **kwargs):
@@ -769,7 +769,7 @@ class createBox(util.SafeHandler):
             sType = self.get_argument("type", default='', strip=False)
             sLocation = self.get_argument("location", default='', strip=False)
             sSlask = cur.execute("""SELECT vial_type from vialdb.vial_type
-                               where vial_type_desc = '%s'""" % (sType))[0].vial_type
+                               where vial_type_desc = '%s'""" % (sType))[0][0]
             iVialPk = cur.fetchall()
         except:
             logging.error("Error cant find description or type in the argument list")
@@ -779,7 +779,7 @@ class createBox(util.SafeHandler):
             return
         sBox = getNewBoxId()
         sSql = """insert into vialdb.box (box_id, box_description, vial_type,
-                  location_id, update_date) values (%s, %s, %s, %s, now())"""
+                  location_id, update_date) values ('%s', '%s', %s, '%s', now())"""
         sSlask = cur.execute(sSql, sBox, sDescription, iVialPk, sLocation)
         self.createVials(sBox, iVialPk)
         self.write(json.dumps({'boxId':sBox,
@@ -989,7 +989,7 @@ class moveVialToLocation(util.SafeHandler):
         tRes = cur.fetchall()
         if len(tRes) != 1:
             return
-        sUser = tRes[0].vial_location
+        sUser = tRes[0][0]
 
         sOldBox, sOldCoordinate, sCheckedOut = getVialPosition(sVial)
         sOldPos = ""
@@ -1004,7 +1004,7 @@ class moveVialToLocation(util.SafeHandler):
         sSql = """update vialdb.vial set 
                   discarded=%s, 
                   update_date=now() 
-                  where vial_id=%s 
+                  where vial_id='%s' 
                """ % (None, sVial)
         sSlask = cur.execute(sSql)
 
@@ -1012,8 +1012,8 @@ class moveVialToLocation(util.SafeHandler):
         deleteOldVialPosition(sVial)
  
         sSql = """update vialdb.vial set 
-                  checkedout = %s 
-                  where vial_id = %s 
+                  checkedout = '%s' 
+                  where vial_id = '%s' 
                """ % (sUser, sVial)
         sSlask = cur.execute(sSql)
 
