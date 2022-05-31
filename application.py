@@ -12,7 +12,6 @@ import re
 import util
 #import cx_Oracle
 import codecs
-
 import config
 
 #dsn_tns = cx_Oracle.makedsn('localhost', 1521, 'star')
@@ -347,6 +346,7 @@ def getBoxFromDb(sBox):
     return res_to_json(tRes, cur)#jRes
 
 def doPrint(sCmp, sBatch, sType, sDate, sVial):
+
     zplVial = """^XA
 ^MMT
 ^PW400
@@ -365,15 +365,16 @@ def doPrint(sCmp, sBatch, sType, sDate, sVial):
 ^FO300,120^FDVial: %s^FS
 
 ^FX Third section with barcode.
-^BY1,3,45
-^FO490,30^BCR^FD%s^FS
+^BY2,3,45
+^FO300,142^BCN^FD%s^FS
 ^XZ
 """ % (sCmp, sBatch, sType, sDate, sVial, sVial)
+
     f = open('/tmp/file.txt','w')
     f.write(zplVial)
     f.close()
-    os.system("lp -h homer.scilifelab.se:631 -d CBCS-GK420d /tmp/file.txt")
-
+    os.system("lp -h homer.scilifelab.se:631 -d CBCS-GK420t /tmp/file.txt")
+    #os.system("lp -h homer.scilifelab.se:631 -d CBCS-GK420d /tmp/file.txt")
 
 
 class createLocation(util.SafeHandler):
@@ -712,7 +713,7 @@ class updateVialPosition(util.SafeHandler):
                        from vialdb.box b
                        left join vialdb.box_positions v on b.box_id = v.box_id
                        left join vialdb.vial c on v.vial_id = c.vial_id
-                       where b.box_id = '%s' and coordinate = '%s'""" % (sBoxId, iCoordinate))
+                       where b.box_id = '%s' and coordinate = %s""" % (sBoxId, iCoordinate))
         tRes = cur.fetchall()
         #jRes = {"vialId":tRes[0].vial_id,
         #        "coordinate":tRes[0].coordinate,
@@ -944,8 +945,6 @@ class searchBatches(util.SafeHandler):
             where v.batch_id = '%s'
             """
         for sId in sIds:
-            print(sSql)
-            print(sId)
             sSlask = cur.execute(sSql % (sId))
             tRes = cur.fetchall()
             if len(tRes) == 0:

@@ -162,9 +162,8 @@
 				 'coordinate':rowEntity.coordinate})
 		  })
 		.success(function(data){
-		    console.log(data)
-		    localThis.resetOldPosition(data.vialId);
-		    localThis.gridOptions.data[rowEntity.coordinate-1] = data;
+		    localThis.resetOldPosition(data[0].vialId);
+		    localThis.gridOptions.data[rowEntity.coordinate-1] = data[0];
 
 		    localThis.gridApi.cellNav.scrollToFocus(localThis.gridOptions.data[rowEntity.coordinate],
 							    localThis.gridOptions.columnDefs[0]);
@@ -173,6 +172,7 @@
 		    return true;
 		})
 		.error(function(data){
+		    console.log("Error")
 		    //alert(data[0].message)
 		    localThis.sMessage = data[0].message;
 		    localThis.showMessage = true;
