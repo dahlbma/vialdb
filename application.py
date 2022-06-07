@@ -569,11 +569,11 @@ class generateVialId(util.SafeHandler):
 
 class discardVial(util.SafeHandler):
     def get(self, sVial):
-        sSql = """update vialdb.box_positions set vial_id=%s, update_date=now()
-                  where vial_id='%s'""" % (None, sVial)
+        sSql = """update vialdb.box_positions set vial_id=NULL, update_date=now()
+                  where vial_id='%s'""" % (sVial)
         sSlask = cur.execute(sSql)
-        sSql = """update vialdb.vial set discarded='Discarded', update_date=now(), checkedout=%s
-                  where vial_id='%s'""" % (None, sVial)
+        sSql = """update vialdb.vial set discarded='Discarded', update_date=now(), checkedout=NULL
+                  where vial_id='%s'""" % (sVial)
         sSlask = cur.execute(sSql)
         logVialChange(sVial, '', 'Discarded')
         self.finish()
@@ -990,10 +990,10 @@ class moveVialToLocation(util.SafeHandler):
 
         # Reset discarded flag if it was set 
         sSql = """update vialdb.vial set 
-                  discarded=%s, 
+                  discarded=NULL,
                   update_date=now() 
                   where vial_id='%s' 
-               """ % (None, sVial)
+               """ % (sVial)
         sSlask = cur.execute(sSql)
 
         # Erase the old place of the vial

@@ -15,7 +15,8 @@ import config
 tornado.log.enable_pretty_logging()
 logging.getLogger().setLevel(logging.DEBUG)
 
-redirect_uri = "https://esox2.scilifelab.se:8082/login"
+redirect_uri = "https://esox3.scilifelab.se:8083/login"
+#redirect_uri = "https://esox3.scilifelab.se/dddp/login"
 
 #settings = {
 #    "cookie_secret": config.secret_key,
