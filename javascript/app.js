@@ -1,4 +1,5 @@
 (function() {
+    var baseUrl = 'https://esox3.scilifelab.se/dddp';
     var gData =  {"locDescription":"",
     		  "locId":"",
 		  "boxes":[],
@@ -19,11 +20,11 @@
 	this.gridOptions = {};
 	var localThis = this;
 
-	$http.get('/getVialTypes').success(function(data){
+	$http.get(baseUrl + '/getVialTypes').success(function(data){
 	    localThis.data.locationTypes = data;
 	});
 
-	$http.get('/getLocations').success(function(data){
+	$http.get(baseUrl + '/getLocations').success(function(data){
 	    localThis.data.locations = data;
 	})
     });
@@ -36,7 +37,7 @@
 	this.sLocation = ""
 	this.searchLoc = function(locations){
 	    $http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
-	    $http({url:'/searchLocation/' + localThis.sLocation,
+	    $http({url:baseUrl + '/searchLocation/' + localThis.sLocation,
 		   method:'GET'
 		  })
 		.success(function(data){
@@ -59,7 +60,7 @@
 
 	this.addLoc = function(locations){
 	    $http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
-	    $http({url:'/createLocation',
+	    $http({url:baseUrl + '/createLocation',
 		   method:'POST',
 		   data:$.param({'description':localThis.sDescription})
 		  })
@@ -68,7 +69,7 @@
 		    localThis.data.locDescription = data.locDescription;
 
 		    // Update the list of locations (with the newly created one)
-		    $http.get('/getLocations').success(function(data){
+		    $http.get(baseUrl + '/getLocations').success(function(data){
 			localThis.data.locations = data;
 		    });
 		    // Reset the form
@@ -99,7 +100,7 @@
 	var localThis = this;
 
 	this.printClick = function(){
- 	    $http({url:'/printBox/' + localThis.sBox,
+ 	    $http({url:baseUrl + '/printBox/' + localThis.sBox,
 		   method:'GET'
 		  });
 	};
@@ -155,7 +156,7 @@
 	    console.log(rowEntity)
 	    localThis.gridApi.rowEdit.setSavePromise(rowEntity, promise.promise);
 	    $http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
-	    $http({url:'/updateVialPosition',
+	    $http({url:baseUrl + '/updateVialPosition',
 		   method:'POST',
 		   data:$.param({'vialId':localThis.sVial,
 				 'boxId':localThis.sBox,
@@ -191,7 +192,7 @@
 	};
 
 	this.searchBox = function(boxes){
-	    $http.get('/updateBox/' + localThis.sBox)
+	    $http.get(baseUrl + '/updateBox/' + localThis.sBox)
 		.success(function(data) {
 		    localThis.gridOptions.data = data[0].data;
 		    localThis.sMessage = "";
@@ -225,7 +226,7 @@
 	console.log(gData)
 	this.addBox = function(boxes){
 	    $http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
-	    $http({url:'/createBox',
+	    $http({url:baseUrl + '/createBox',
 		   method:'POST',
 		   data:$.param({'type':localThis.sBoxType.vial_type_desc,
    				 'description':localThis.sDescription,
@@ -269,7 +270,7 @@
 
 	var localThis = this;
 	this.searchVials = function(stuff) {
-	    $http.get('/searchVials/' + localThis.sVials)
+	    $http.get(baseUrl + '/searchVials/' + localThis.sVials)
 		.success(function(data){
 		    localThis.gridOptions.data = data;
 		})
@@ -299,7 +300,7 @@
 	};
 
         this.getLocations = function(){
-            $http({url:'/getLocation',
+            $http({url:baseUrl + '/getLocation',
                    method:'GET'
                   })
                 .success(function(data){
@@ -308,7 +309,7 @@
         };
         this.getLocations();
 	this.updateLocation = function(sThisUser){
-            $http({url:'/moveVialToLocation/' + localThis.sVial + '/' + sThisUser,
+            $http({url:baseUrl + '/moveVialToLocation/' + localThis.sVial + '/' + sThisUser,
                    method:'GET'
                   })
                 .success(function(data){
@@ -325,12 +326,12 @@
 
 
 	this.printClick = function(){
- 	    $http({url:'/printVial/' + localThis.sVial,
+ 	    $http({url:baseUrl + '/printVial/' + localThis.sVial,
 		   method:'GET'
 		  });
 	};
 	this.discardClick = function(){
- 	    $http({url:'/discardVial/' + localThis.sVial,
+ 	    $http({url:baseUrl + '/discardVial/' + localThis.sVial,
 		   method:'GET'
 		  })
 		.success(function(data){
@@ -344,7 +345,7 @@
 		if (localThis.sVial.search(/v\d\d\d\d\d(\d|\d\d)/i) === 0){
 		    localThis.sLocation = localThis.saLocations[0]
 
-		    $http({url:'/vialInfo/' + localThis.sVial,
+		    $http({url:baseUrl + '/vialInfo/' + localThis.sVial,
 			   method:'GET'
 			  })
 			.success(function(data){
@@ -432,7 +433,7 @@
 	this.vialChange = function(){
 	    if (typeof localThis.formData.sVial != 'undefined'){
 		if (localThis.formData.sVial.search(/v\d\d\d\d\d(\d|\d\d)/i) === 0){
-		    $http({url:'/verifyVial/' + localThis.formData.sVial,
+		    $http({url:baseUrl + '/verifyVial/' + localThis.formData.sVial,
 			   method:'GET'
 			  })
 			.success(function(data){
@@ -451,7 +452,7 @@
 	this.printVial = function(){
 	    console.log("Print vial");
 	    $http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
-	    $http({url:'/printVial/' + localThis.formData.sVial,
+	    $http({url:baseUrl + '/printVial/' + localThis.formData.sVial,
 		   method:'GET'
 		  })
 		.success(function(data){
@@ -467,7 +468,7 @@
 
 	this.editVial = function(){
 	    $http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
-	    $http({url:'/editVial',
+	    $http({url:baseUrl + '/editVial',
 		   method:'POST',
 		   data:$.param(localThis.formData)
 		  })
@@ -485,7 +486,7 @@
 	this.batchChange = function(){
 	    
 	    if (typeof localThis.formData.batch_id != 'undefined'){
-		$http({url:'/batchInfo/' + localThis.formData.batch_id,
+		$http({url:baseUrl + '/batchInfo/' + localThis.formData.batch_id,
 		       method:'GET'
 		      })
 		    .success(function(data){
@@ -504,7 +505,7 @@
 	};
 
 	this.updatedVialType = function(){
-	    $http({url:'/getBoxOfType/' + localThis.formData.sBoxType.vial_type,
+	    $http({url:baseUrl + '/getBoxOfType/' + localThis.formData.sBoxType.vial_type,
 		   method:'GET'
 		  })
 		.success(function(data){
@@ -565,7 +566,7 @@
 	};
 
 	this.updatedVialType = function(){
-	    $http({url:'/getBoxOfType/' + localThis.sBoxType.vial_type,
+	    $http({url:baseUrl + '/getBoxOfType/' + localThis.sBoxType.vial_type,
 		   method:'GET'
 		  })
 		.success(function(data){
@@ -581,7 +582,7 @@
 	this.vialChange = function(){
 	    if (typeof localThis.sVial != 'undefined'){
 		if (localThis.sVial.search(/v\d\d\d\d\d(\d|\d\d)/i) === 0){
-		    $http({url:'/verifyVial/' + localThis.sVial,
+		    $http({url:baseUrl + '/verifyVial/' + localThis.sVial,
 			   method:'GET'
 			  })
 			.success(function(data){
@@ -605,7 +606,7 @@
 	
 	this.checkinVial = function(stuff){
 	    $http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
-	    $http({url:'/checkinVial',
+	    $http({url:baseUrl + '/checkinVial',
 		   method:'POST',
 		   data:$.param({'vial_id':localThis.vialInfo.vial_id,
    				 'batch_id':localThis.vialInfo.batch_id,
@@ -682,7 +683,7 @@
 	    console.log(localThis.sBoxType);
 	    console.log(localThis.numberOfVials)
 	    $http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
-	    $http({url:'/createManyVialsNLabels',
+	    $http({url:baseUrl + '/createManyVialsNLabels',
 		   method:'POST',
 		   data:$.param({'vialType':localThis.sBoxType.vial_type,
 				'numberOfVials':localThis.numberOfVials})
@@ -704,7 +705,7 @@
 	$scope.uploadFile = function(){
             var file = $scope.myFile;
             console.log('file is ' + JSON.stringify(file));
-            var uploadUrl = "/uploadEmptyVials";
+            var uploadUrl = baseUrl + "/uploadEmptyVials";
             fileUpload.uploadFileToUrl(file, uploadUrl, $scope);
 	    $scope.saFailedVials = null;
 	};
@@ -735,7 +736,7 @@
 	var localThis = this;
 	this.getMicrotubes = function(stuff) {
 	    localThis.showSpinner = 'spinner';
-	    $http.get('/getMicroTubeByBatch/' + localThis.sBatches)
+	    $http.get(baseUrl + '/getMicroTubeByBatch/' + localThis.sBatches)
 		.success(function(data){
 		    localThis.gridOptions.data = data;
 		    localThis.showSpinner = 'no-spinner';
@@ -774,7 +775,7 @@
 	var localThis = this;
 	this.getRack = function(stuff) {
 	    localThis.showSpinner = 'spinner';
-	    $http.get('/getRack/' + localThis.sRack)
+	    $http.get(baseUrl + '/getRack/' + localThis.sRack)
 		.success(function(data){
 		    localThis.gridOptions.data = data;
 		    localThis.showSpinner = 'no-spinner';
@@ -828,7 +829,7 @@
 	$scope.uploadFile = function(){
             var file = $scope.myFile;
             console.log('file is ' + JSON.stringify(file));
-            var uploadUrl = "/readScannedRack";
+            var uploadUrl = baseUrl + "/readScannedRack";
             rackUpload.uploadFileToUrl(file, uploadUrl, $scope);
 	    $scope.saFailedTubes = null;
 	};
@@ -859,7 +860,7 @@
 
 	var localThis = this;
 	this.searchBatches = function(stuff) {
-	    $http.get('/searchBatches/' + localThis.sBatches)
+	    $http.get(baseUrl + '/searchBatches/' + localThis.sBatches)
 		.success(function(data){
 		    localThis.gridOptions.data = data;
 		})

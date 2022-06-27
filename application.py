@@ -518,14 +518,10 @@ class printVial(util.SafeHandler):
 
 def getNextVialId():
     sTmp = "V%"
-    sSql = """select vial_id from vialdb.vial where vial_id like '%s'
-              order by LENGTH(vial_id) DESC, vial_id desc limit 1""" % (sTmp)
+    sSql = f"""select vial_id from vialdb.vial where vial_id like '{sTmp}' and vial_id not like 'VUF%'
+              order by LENGTH(vial_id) DESC, vial_id desc limit 1"""
     sSlask =  cur.execute(sSql)
-    sVial = cur.fetchall()
-    try:
-        sVial = sVial[0]['vial_id']
-    except:
-        logging.error(sVial)
+    sVial = cur.fetchall()[0][0]
         
     try:
         iVial = int(sVial.split('V')[1])
@@ -540,8 +536,8 @@ class createManyVialsNLabels(util.SafeHandler):
         iNumberOfVials = int(self.get_argument("numberOfVials", default='', strip=False))
         sType = self.get_argument("vialType", default='', strip=False)
         sSql = """SELECT vial_type_desc FROM vialdb.vial_type where vial_type = %s""" % (sType)
-        sSlask = cur.execute(sSql)[0]['vial_type_desc']
-        sTypeDesc = cur.fetchall()
+        sSlask = cur.execute(sSql)
+        sTypeDesc = cur.fetchall()[0][0]
         for i in range(iNumberOfVials):
             sDate = (time.strftime("%Y-%m-%d"))
             sCmp = ""
@@ -731,6 +727,7 @@ class printBox(util.SafeHandler):
         tRes = cur.fetchall()
         sType = tRes[0][1]
         sDescription = tRes[0][0]
+
         zplVial = """^XA
 ^MMT
 ^PW400
@@ -746,14 +743,15 @@ class printBox(util.SafeHandler):
 ^A0,25,20
 
 ^FX Third section with barcode.
-^BY1,3,45
-^FO490,30^BCR^FD%s^FS
+^BY2,3,45
+^FO300,142^BCN^FD%s^FS
 ^XZ
 """ % (sBox.upper(), sType, sDescription, sBox.upper())
+        
         f = open('/tmp/file.txt','w')
         f.write(zplVial)
         f.close()
-        os.system("lp -h homer.scilifelab.se:631 -d CBCS-GK420d /tmp/file.txt")
+        os.system("lp -h homer.scilifelab.se:631 -d CBCS-GK420t /tmp/file.txt")
         self.finish("Printed")
 
 class createBox(util.SafeHandler):
@@ -770,21 +768,24 @@ class createBox(util.SafeHandler):
             sType = self.get_argument("type", default='', strip=False)
             sLocation = self.get_argument("location", default='', strip=False)
             sSlask = cur.execute("""SELECT vial_type from vialdb.vial_type
-                               where vial_type_desc = '%s'""" % (sType))[0][0]
-            iVialPk = cur.fetchall()
-        except:
+                               where vial_type_desc = '%s'""" % (sType))
+            iVialPk = cur.fetchall()[0][0]
+            logging.info(iVialPk)
+        except Exception as e:
+            logging.error(str(e))
             logging.error("Error cant find description or type in the argument list")
             logging.error(sDescription)
             logging.error("sType " + sType)
             logging.error("sLocation " + sLocation)
             return
         sBox = getNewBoxId()
-        sSql = """insert into vialdb.box (box_id, box_description, vial_type,
-                  location_id, update_date) values ('%s', '%s', %s, '%s', now())"""
-        sSlask = cur.execute(sSql, sBox, sDescription, iVialPk, sLocation)
+        sSql = f"""insert into vialdb.box (box_id, box_description, vial_type,
+                  location_id, update_date) values ('{sBox}', '{sDescription}', {iVialPk}, '{sLocation}', now())"""
+        sSlask = cur.execute(sSql)
         self.createVials(sBox, iVialPk)
         self.write(json.dumps({'boxId':sBox,
                                'boxDescription':sDescription}))
+
         zplVial = """^XA
 ^MMT
 ^PW400
@@ -800,14 +801,17 @@ class createBox(util.SafeHandler):
 ^A0,25,20
 
 ^FX Third section with barcode.
-^BY1,3,45
-^FO490,30^BCR^FD%s^FS
+^BY2,3,45
+^FO300,142^BCN^FD%s^FS
 ^XZ
 """ % (sBox.upper(), sType, sDescription, sBox.upper())
+
+        
+        
         f = open('/tmp/file.txt','w')
         f.write(zplVial)
         f.close()
-        os.system("lp -h homer.scilifelab.se:631 -d CBCS-GK420d /tmp/file.txt")
+        os.system("lp -h homer.scilifelab.se:631 -d CBCS-GK420t /tmp/file.txt")
         self.finish("Printed")
 
 

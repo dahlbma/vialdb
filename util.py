@@ -122,7 +122,7 @@ class LoginHandler(tornado.web.RequestHandler):
     
     def get(self):
         self.write(
-            '<form class="modal-content animate" action="/login" method="post">'
+            '<form class="modal-content animate" action="/dddp/login" method="post">'
                 '<div class="container">'
                     '<label for="username"><b>Username</b></label>'
                     '<input type="text" placeholder="Enter Username" name="username" required>'
@@ -151,7 +151,7 @@ class LoginHandler(tornado.web.RequestHandler):
                 url=self.get_secure_cookie("login_redirect")
                 self.clear_cookie("login_redirect")
                 if url is None:
-                    url = '/'
+                    url = '/dddp/'
             else:
                 url = "/unauthorized?email={0}&contact={1}".format(user.emails[0],
                         self.application.settings['contact_person'])
@@ -195,7 +195,7 @@ class LoginHandler(tornado.web.RequestHandler):
         self.set_secure_cookie('token', jwt_token)
     
         #self.set_secure_cookie('login_redirect', self.get_argument("next", '/'), 1)
-        self.redirect("/")
+        self.redirect("/dddp/")
         #self.authorize_redirect(
         #            redirect_uri=self.application.settings['redirect_uri'],
         #            client_id=self.application.oauth_key,
@@ -212,7 +212,7 @@ class LogoutHandler(tornado.web.RequestHandler, tornado.auth.GoogleOAuth2Mixin):
         
         self.clear_cookie("token")
         self.clear_cookie("username")
-        self.redirect("/")
+        self.redirect("/dddp/")
 
 class UnAuthorizedHandler(UnsafeHandler):
     """ Serves a page with unauthorized notice and information about who to contact to get access. """

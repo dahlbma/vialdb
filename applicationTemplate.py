@@ -5,6 +5,7 @@ indexHead="""
 <html ng-app="App">
 
 <head>
+<link rel="shortcut icon" href="/dddp/favicon.ico">
   <!-- SCROLLS -->
   <meta charset="utf-8">
 
@@ -19,12 +20,12 @@ indexHead="""
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular-route.js"></script>
 
   <!-- Angular grid gui -->
-    <script src="/javascript/ui-grid/pdfmake.js"></script>
-    <script src="/javascript/ui-grid/vfs_fonts.js"></script>
-    <script src="/javascript/ui-grid/ui-grid.js"></script>
-    <link rel="stylesheet" href="/javascript/ui-grid/ui-grid.css" type="text/css">
-    <link rel="stylesheet" href="/javascript/main.css" type="text/css">
-    <link rel="stylesheet" href="/static/css/local.css" type="text/css">
+    <script src="/dddp/javascript/ui-grid/pdfmake.js"></script>
+    <script src="/dddp/javascript/ui-grid/vfs_fonts.js"></script>
+    <script src="/dddp/javascript/ui-grid/ui-grid.js"></script>
+    <link rel="stylesheet" href="/dddp/javascript/ui-grid/ui-grid.css" type="text/css">
+    <link rel="stylesheet" href="/dddp/javascript/main.css" type="text/css">
+    <link rel="stylesheet" href="/dddp/static/css/local.css" type="text/css">
 
   <script src="javascript/app.js"></script>
 </head>
@@ -36,7 +37,7 @@ indexHtml="""
   <nav class="navbar navbar-default">
     <div class="container">
       <div class="navbar-header">
-        <a class="navbar-brand" href="/">DDDP Vials</a>
+        <a class="navbar-brand" href="/dddp/">DDDP Vials</a>
       </div>
 
       <ul class="nav navbar-nav navbar-right">
@@ -97,10 +98,10 @@ indexHtml="""
               {%if user_name != None%}
                 {{user_name}}
                 <br>
-                <a href="/logout">Logout</a>
+                <a href="/dddp/logout">Logout</a>
               {% else %}
                 <br>
-                <a href="/login">Login</a>
+                <a href="/dddp/login">Login</a>
               {% end %}
            </div>
       </ul>
@@ -132,7 +133,7 @@ notAuthorizedHtml="""
       <ul class="nav navbar-nav navbar-right">
            <div class="btn-group navbar-btn">
                 <br>
-                <a href="/login">Login</a>
+                <a href="/dddp/login">Login</a>
            </div>
       </ul>
     </div>
