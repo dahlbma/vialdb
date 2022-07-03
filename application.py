@@ -40,6 +40,10 @@ class PingDB(tornado.web.RequestHandler):
         sSql = "select * from vialdb.box where pk = 0"
         cur.execute(sSql)
 
+    def head(self):
+        sSql = "select * from vialdb.box where pk = 0"
+        cur.execute(sSql)
+
 
 class home(util.UnsafeHandler):
     def get(self, *args, **kwargs):
